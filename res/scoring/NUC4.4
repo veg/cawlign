@@ -1,0 +1,24 @@
+; define the valid alphabet
+[ALPHABET]
+alphabet = ATGCSWRYKMBVHD
+
+; scoring matrix
+; if the alphabet has "D" characters this must be a (D+1) x (D+1) vector
+; which represents (row-major) the scoring matrix
+; element (i,j), where 0 <= i < D, 0 <=j < D, is the cost for changing 
+; if the matrix is not symmetric,  the row index would refer to the character in the reference sequence
+; character i into character j in the alphabet string
+; (i,D), (D,j) is the cost of aligning i (or j) vs a non-gap but allowed (e.g. an ambiguity) character 
+
+[MATRIX]
+
+cost = 5,-4,-4,-4,-4,1,1,-4,-4,1,-4,-1,-1,-1,-2,-4,5,-4,-4,-4,1,-4,1,1,-4,-1,-4,-1,-1,-2,-4,-4,5,-4,1,-4,1,-4,1,-4,-1,-1,-4,-1,-2,-4,-4,-4,5,1,-4,-4,1,-4,1,-1,-1,-1,-4,-2,-4,-4,1,1,-1,-4,-2,-2,-2,-2,-1,-1,-3,-3,-1,1,1,-4,-4,-4,-1,-2,-2,-2,-2,-3,-3,-1,-1,-1,1,-4,1,-4,-2,-2,-1,-4,-2,-2,-3,-1,-3,-1,-1,-4,1,-4,1,-2,-2,-4,-1,-2,-2,-1,-3,-1,-3,-1,-4,1,1,-4,-2,-2,-2,-2,-1,-4,-1,-3,-3,-1,-1,1,-4,-4,1,-2,-2,-2,-2,-4,-1,-3,-1,-1,-3,-1,-4,-1,-1,-1,-1,-3,-3,-1,-1,-3,-1,-2,-2,-2,-1,-1,-4,-1,-1,-1,-3,-1,-3,-3,-1,-2,-1,-2,-2,-1,-1,-1,-4,-1,-3,-1,-3,-1,-3,-1,-2,-2,-1,-2,-1,-1,-1,-1,-4,-3,-1,-1,-3,-1,-3,-2,-2,-2,-1,-1,-2,-2,-2,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+
+; define other parameters
+; insertions/deletions are defined relative to the REFERENCE 
+[PARAMETERS]
+
+open_deletion = 10.
+extend_deletion = 0.5
+open_insertion = 10.
+extend_insertion = 0.5
