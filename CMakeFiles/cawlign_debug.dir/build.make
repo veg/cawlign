@@ -62,10 +62,10 @@ RM = /usr/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/sergei/Dropbox/Code/cawlign
+CMAKE_SOURCE_DIR = /Users/sergei/Development/cawlign
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/sergei/Dropbox/Code/cawlign
+CMAKE_BINARY_DIR = /Users/sergei/Development/cawlign
 
 # Include any dependencies generated for this target.
 include CMakeFiles/cawlign_debug.dir/depend.make
@@ -78,94 +78,94 @@ include CMakeFiles/cawlign_debug.dir/flags.make
 
 CMakeFiles/cawlign_debug.dir/src/alignment.cpp.o: CMakeFiles/cawlign_debug.dir/flags.make
 CMakeFiles/cawlign_debug.dir/src/alignment.cpp.o: src/alignment.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/cawlign_debug.dir/src/alignment.cpp.o"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/alignment.cpp.o -c /Users/sergei/Dropbox/Code/cawlign/src/alignment.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/cawlign_debug.dir/src/alignment.cpp.o"
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/alignment.cpp.o -c /Users/sergei/Development/cawlign/src/alignment.cpp
 
 CMakeFiles/cawlign_debug.dir/src/alignment.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/cawlign_debug.dir/src/alignment.cpp.i"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Dropbox/Code/cawlign/src/alignment.cpp > CMakeFiles/cawlign_debug.dir/src/alignment.cpp.i
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Development/cawlign/src/alignment.cpp > CMakeFiles/cawlign_debug.dir/src/alignment.cpp.i
 
 CMakeFiles/cawlign_debug.dir/src/alignment.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/cawlign_debug.dir/src/alignment.cpp.s"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Dropbox/Code/cawlign/src/alignment.cpp -o CMakeFiles/cawlign_debug.dir/src/alignment.cpp.s
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Development/cawlign/src/alignment.cpp -o CMakeFiles/cawlign_debug.dir/src/alignment.cpp.s
 
 CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.o: CMakeFiles/cawlign_debug.dir/flags.make
 CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.o: src/stringBuffer.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.o"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.o -c /Users/sergei/Dropbox/Code/cawlign/src/stringBuffer.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.o"
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.o -c /Users/sergei/Development/cawlign/src/stringBuffer.cc
 
 CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.i"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Dropbox/Code/cawlign/src/stringBuffer.cc > CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.i
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Development/cawlign/src/stringBuffer.cc > CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.i
 
 CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.s"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Dropbox/Code/cawlign/src/stringBuffer.cc -o CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.s
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Development/cawlign/src/stringBuffer.cc -o CMakeFiles/cawlign_debug.dir/src/stringBuffer.cc.s
 
 CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.o: CMakeFiles/cawlign_debug.dir/flags.make
 CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.o: src/tn93_shared.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.o"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.o -c /Users/sergei/Dropbox/Code/cawlign/src/tn93_shared.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.o"
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.o -c /Users/sergei/Development/cawlign/src/tn93_shared.cc
 
 CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.i"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Dropbox/Code/cawlign/src/tn93_shared.cc > CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.i
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Development/cawlign/src/tn93_shared.cc > CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.i
 
 CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.s"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Dropbox/Code/cawlign/src/tn93_shared.cc -o CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.s
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Development/cawlign/src/tn93_shared.cc -o CMakeFiles/cawlign_debug.dir/src/tn93_shared.cc.s
 
 CMakeFiles/cawlign_debug.dir/src/argparse.cpp.o: CMakeFiles/cawlign_debug.dir/flags.make
 CMakeFiles/cawlign_debug.dir/src/argparse.cpp.o: src/argparse.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/cawlign_debug.dir/src/argparse.cpp.o"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/argparse.cpp.o -c /Users/sergei/Dropbox/Code/cawlign/src/argparse.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/cawlign_debug.dir/src/argparse.cpp.o"
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/argparse.cpp.o -c /Users/sergei/Development/cawlign/src/argparse.cpp
 
 CMakeFiles/cawlign_debug.dir/src/argparse.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/cawlign_debug.dir/src/argparse.cpp.i"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Dropbox/Code/cawlign/src/argparse.cpp > CMakeFiles/cawlign_debug.dir/src/argparse.cpp.i
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Development/cawlign/src/argparse.cpp > CMakeFiles/cawlign_debug.dir/src/argparse.cpp.i
 
 CMakeFiles/cawlign_debug.dir/src/argparse.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/cawlign_debug.dir/src/argparse.cpp.s"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Dropbox/Code/cawlign/src/argparse.cpp -o CMakeFiles/cawlign_debug.dir/src/argparse.cpp.s
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Development/cawlign/src/argparse.cpp -o CMakeFiles/cawlign_debug.dir/src/argparse.cpp.s
 
 CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.o: CMakeFiles/cawlign_debug.dir/flags.make
 CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.o: src/cawlign.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.o"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.o -c /Users/sergei/Dropbox/Code/cawlign/src/cawlign.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.o"
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.o -c /Users/sergei/Development/cawlign/src/cawlign.cpp
 
 CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.i"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Dropbox/Code/cawlign/src/cawlign.cpp > CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.i
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Development/cawlign/src/cawlign.cpp > CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.i
 
 CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.s"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Dropbox/Code/cawlign/src/cawlign.cpp -o CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.s
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Development/cawlign/src/cawlign.cpp -o CMakeFiles/cawlign_debug.dir/src/cawlign.cpp.s
 
 CMakeFiles/cawlign_debug.dir/src/configparser.cpp.o: CMakeFiles/cawlign_debug.dir/flags.make
 CMakeFiles/cawlign_debug.dir/src/configparser.cpp.o: src/configparser.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/cawlign_debug.dir/src/configparser.cpp.o"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/configparser.cpp.o -c /Users/sergei/Dropbox/Code/cawlign/src/configparser.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/cawlign_debug.dir/src/configparser.cpp.o"
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/configparser.cpp.o -c /Users/sergei/Development/cawlign/src/configparser.cpp
 
 CMakeFiles/cawlign_debug.dir/src/configparser.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/cawlign_debug.dir/src/configparser.cpp.i"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Dropbox/Code/cawlign/src/configparser.cpp > CMakeFiles/cawlign_debug.dir/src/configparser.cpp.i
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Development/cawlign/src/configparser.cpp > CMakeFiles/cawlign_debug.dir/src/configparser.cpp.i
 
 CMakeFiles/cawlign_debug.dir/src/configparser.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/cawlign_debug.dir/src/configparser.cpp.s"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Dropbox/Code/cawlign/src/configparser.cpp -o CMakeFiles/cawlign_debug.dir/src/configparser.cpp.s
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Development/cawlign/src/configparser.cpp -o CMakeFiles/cawlign_debug.dir/src/configparser.cpp.s
 
 CMakeFiles/cawlign_debug.dir/src/scoring.cpp.o: CMakeFiles/cawlign_debug.dir/flags.make
 CMakeFiles/cawlign_debug.dir/src/scoring.cpp.o: src/scoring.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/cawlign_debug.dir/src/scoring.cpp.o"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/scoring.cpp.o -c /Users/sergei/Dropbox/Code/cawlign/src/scoring.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/cawlign_debug.dir/src/scoring.cpp.o"
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/cawlign_debug.dir/src/scoring.cpp.o -c /Users/sergei/Development/cawlign/src/scoring.cpp
 
 CMakeFiles/cawlign_debug.dir/src/scoring.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/cawlign_debug.dir/src/scoring.cpp.i"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Dropbox/Code/cawlign/src/scoring.cpp > CMakeFiles/cawlign_debug.dir/src/scoring.cpp.i
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/sergei/Development/cawlign/src/scoring.cpp > CMakeFiles/cawlign_debug.dir/src/scoring.cpp.i
 
 CMakeFiles/cawlign_debug.dir/src/scoring.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/cawlign_debug.dir/src/scoring.cpp.s"
-	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Dropbox/Code/cawlign/src/scoring.cpp -o CMakeFiles/cawlign_debug.dir/src/scoring.cpp.s
+	/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/sergei/Development/cawlign/src/scoring.cpp -o CMakeFiles/cawlign_debug.dir/src/scoring.cpp.s
 
 # Object files for target cawlign_debug
 cawlign_debug_OBJECTS = \
@@ -190,7 +190,7 @@ cawlign_debug: CMakeFiles/cawlign_debug.dir/src/scoring.cpp.o
 cawlign_debug: CMakeFiles/cawlign_debug.dir/build.make
 cawlign_debug: /usr/local/lib/libomp.dylib
 cawlign_debug: CMakeFiles/cawlign_debug.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable cawlign_debug"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable cawlign_debug"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/cawlign_debug.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -203,6 +203,6 @@ CMakeFiles/cawlign_debug.dir/clean:
 .PHONY : CMakeFiles/cawlign_debug.dir/clean
 
 CMakeFiles/cawlign_debug.dir/depend:
-	cd /Users/sergei/Dropbox/Code/cawlign && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/sergei/Dropbox/Code/cawlign /Users/sergei/Dropbox/Code/cawlign /Users/sergei/Dropbox/Code/cawlign /Users/sergei/Dropbox/Code/cawlign /Users/sergei/Dropbox/Code/cawlign/CMakeFiles/cawlign_debug.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/sergei/Development/cawlign && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/sergei/Development/cawlign /Users/sergei/Development/cawlign /Users/sergei/Development/cawlign /Users/sergei/Development/cawlign /Users/sergei/Development/cawlign/CMakeFiles/cawlign_debug.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/cawlign_debug.dir/depend
 

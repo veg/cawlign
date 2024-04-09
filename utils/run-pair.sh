@@ -13,7 +13,7 @@ echo "Running CAWLIGN"
 echo ""
 echo ""
 
-/usr/bin/time -l -h -p  cawlign -r HXB2_pol -t codon -I -s BLOSUM62 -o $CAWLIGN_MSA $SEQS
+/usr/bin/time -l -h -p  cawlign -r HXB2_pol -t codon -I -s HIV_BETWEEN_F -o $CAWLIGN_MSA $SEQS
 
 echo ""
 echo ""
@@ -21,7 +21,7 @@ echo "Running BEALIGN"
 echo ""
 echo ""
 
-/usr/bin/time -l -h -p  bealign -r HXB2_pol -m BLOSUM62 -K $SEQS $BEALIGN_BAM
+/usr/bin/time -l -h -p  bealign -r HXB2_pol -m HIV_BETWEEN_F -K $SEQS $BEALIGN_BAM
 bam2msa $BEALIGN_BAM $BEALIGN_MSA
 
 echo ""

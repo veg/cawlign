@@ -63,10 +63,10 @@ RM = /usr/local/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/sergei/Dropbox/Code/cawlign
+CMAKE_SOURCE_DIR = /Users/sergei/Development/cawlign
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/sergei/Dropbox/Code/cawlign
+CMAKE_BINARY_DIR = /Users/sergei/Development/cawlign
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -94,14 +94,14 @@ clean: CMakeFiles/cawlign_debug.dir/clean
 CMakeFiles/cawlign.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cawlign.dir/build.make CMakeFiles/cawlign.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cawlign.dir/build.make CMakeFiles/cawlign.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target cawlign"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target cawlign"
 .PHONY : CMakeFiles/cawlign.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/cawlign.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/sergei/Dropbox/Code/cawlign/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/sergei/Development/cawlign/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/cawlign.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/sergei/Dropbox/Code/cawlign/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/sergei/Development/cawlign/CMakeFiles 0
 .PHONY : CMakeFiles/cawlign.dir/rule
 
 # Convenience name for target.
@@ -121,14 +121,14 @@ CMakeFiles/cawlign.dir/clean:
 CMakeFiles/cawlign_debug.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cawlign_debug.dir/build.make CMakeFiles/cawlign_debug.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cawlign_debug.dir/build.make CMakeFiles/cawlign_debug.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/sergei/Dropbox/Code/cawlign/CMakeFiles --progress-num=9,10,11,12,13,14,15,16 "Built target cawlign_debug"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/sergei/Development/cawlign/CMakeFiles --progress-num=9,10,11,12,13,14,15,16 "Built target cawlign_debug"
 .PHONY : CMakeFiles/cawlign_debug.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/cawlign_debug.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/sergei/Dropbox/Code/cawlign/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/sergei/Development/cawlign/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/cawlign_debug.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/sergei/Dropbox/Code/cawlign/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/sergei/Development/cawlign/CMakeFiles 0
 .PHONY : CMakeFiles/cawlign_debug.dir/rule
 
 # Convenience name for target.

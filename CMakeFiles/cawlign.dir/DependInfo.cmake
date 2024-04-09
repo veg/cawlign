@@ -4,20 +4,20 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/Users/sergei/Dropbox/Code/cawlign/src/alignment.cpp" "/Users/sergei/Dropbox/Code/cawlign/CMakeFiles/cawlign.dir/src/alignment.cpp.o"
-  "/Users/sergei/Dropbox/Code/cawlign/src/argparse.cpp" "/Users/sergei/Dropbox/Code/cawlign/CMakeFiles/cawlign.dir/src/argparse.cpp.o"
-  "/Users/sergei/Dropbox/Code/cawlign/src/cawlign.cpp" "/Users/sergei/Dropbox/Code/cawlign/CMakeFiles/cawlign.dir/src/cawlign.cpp.o"
-  "/Users/sergei/Dropbox/Code/cawlign/src/configparser.cpp" "/Users/sergei/Dropbox/Code/cawlign/CMakeFiles/cawlign.dir/src/configparser.cpp.o"
-  "/Users/sergei/Dropbox/Code/cawlign/src/scoring.cpp" "/Users/sergei/Dropbox/Code/cawlign/CMakeFiles/cawlign.dir/src/scoring.cpp.o"
-  "/Users/sergei/Dropbox/Code/cawlign/src/stringBuffer.cc" "/Users/sergei/Dropbox/Code/cawlign/CMakeFiles/cawlign.dir/src/stringBuffer.cc.o"
-  "/Users/sergei/Dropbox/Code/cawlign/src/tn93_shared.cc" "/Users/sergei/Dropbox/Code/cawlign/CMakeFiles/cawlign.dir/src/tn93_shared.cc.o"
+  "/Users/sergei/Development/cawlign/src/alignment.cpp" "/Users/sergei/Development/cawlign/CMakeFiles/cawlign.dir/src/alignment.cpp.o"
+  "/Users/sergei/Development/cawlign/src/argparse.cpp" "/Users/sergei/Development/cawlign/CMakeFiles/cawlign.dir/src/argparse.cpp.o"
+  "/Users/sergei/Development/cawlign/src/cawlign.cpp" "/Users/sergei/Development/cawlign/CMakeFiles/cawlign.dir/src/cawlign.cpp.o"
+  "/Users/sergei/Development/cawlign/src/configparser.cpp" "/Users/sergei/Development/cawlign/CMakeFiles/cawlign.dir/src/configparser.cpp.o"
+  "/Users/sergei/Development/cawlign/src/scoring.cpp" "/Users/sergei/Development/cawlign/CMakeFiles/cawlign.dir/src/scoring.cpp.o"
+  "/Users/sergei/Development/cawlign/src/stringBuffer.cc" "/Users/sergei/Development/cawlign/CMakeFiles/cawlign.dir/src/stringBuffer.cc.o"
+  "/Users/sergei/Development/cawlign/src/tn93_shared.cc" "/Users/sergei/Development/cawlign/CMakeFiles/cawlign.dir/src/tn93_shared.cc.o"
   )
 set(CMAKE_CXX_COMPILER_ID "AppleClang")
 
 # Preprocessor definitions for this target.
 set(CMAKE_TARGET_DEFINITIONS_CXX
   "LIBRARY_PATH=\"/usr/local/share/cawlign\""
-  "VERSION_NUMBER=\"\""
+  "VERSION_NUMBER=\"v0.0.1\""
   )
 
 # The include file search paths:
