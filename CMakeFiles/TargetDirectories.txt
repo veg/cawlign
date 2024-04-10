@@ -1,8 +1,0 @@
-/Users/sergei/Development/cawlign/CMakeFiles/install/local.dir
-/Users/sergei/Development/cawlign/CMakeFiles/install/strip.dir
-/Users/sergei/Development/cawlign/CMakeFiles/install.dir
-/Users/sergei/Development/cawlign/CMakeFiles/list_install_components.dir
-/Users/sergei/Development/cawlign/CMakeFiles/cawlign.dir
-/Users/sergei/Development/cawlign/CMakeFiles/rebuild_cache.dir
-/Users/sergei/Development/cawlign/CMakeFiles/edit_cache.dir
-/Users/sergei/Development/cawlign/CMakeFiles/cawlign_debug.dir
