@@ -33,6 +33,20 @@ echo
 fasta_diff -m $BEALIGN_MSA -t id_sequence $CAWLIGN_MSA > /dev/null 2>${DIFFS}
 sed -iE 's/'\''/"/g' ${DIFFS}
 
+jq '[.duplicate, .master]' ${DIFFS}
+
 BASEDIR=$(dirname "$0")
 
 python3.9 ${BASEDIR}/compare-overlap.py -b $BEALIGN_MSA -c $CAWLIGN_MSA -d $DIFFS > $DIFFA
+
+echo ""
+echo "BEALIGN TN93"
+echo ""
+
+tn93 -c -t 0.015 -a RYSMBK $BEALIGN_MSA 
+
+echo ""
+echo "CAWLIGN TN93"
+echo ""
+
+tn93 -c -t 0.015 -a RYSMBK $CAWLIGN_MSA

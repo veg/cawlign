@@ -182,11 +182,11 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
                 scoring_matrix.appendValue (_large_penalty);
             } else {
                 cawlign_fp score = _scores[ codon1_translation*aaD + codon2_translation ] ;
-                if (codon2_translation == codon1_translation) {
+                //if (codon2_translation == codon1_translation) {
                     if (codon1 != codon2) {
-                        score -= 1.;
+                        score -= 0.5;
                     }
-                }
+                //}
                 scoring_matrix.appendValue (score);
             }
             //printf ("%g ", scoring_matrix.value (scoring_matrix.length()-1));
@@ -320,6 +320,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
     
     cawlign_fp indel_cost = MAX(max_score, -min_score),
                ext_cost = 3.*(max_score-min_score) / 40.;
+    
     if (frameshift_cost < 0.) {
         frameshift_cost = 3.*indel_cost;
     }
