@@ -31,6 +31,18 @@
 
 using namespace std;
 
+/**
+ * Constructor for `ConfigParser`.
+ *
+ * This function reads and parses a configuration file. It processes lines to strip whitespace, 
+ * ignores comments, and splits key-value pairs using the `=` symbol. If the key is within a section 
+ * (indicated by `[...]`), the key is prefixed with the section name. Multiple values for a key 
+ * are stored in a vector. Parsed configurations are stored in a map with section and key names 
+ * combined as the key.
+ *
+ * @param configFile A reference to an `ifstream` representing the open configuration file.
+ * @throw std::runtime_error if a parsing error occurs in the configuration file.
+ */
 ConfigParser::ConfigParser(ifstream& configFile) {
 
   if (!configFile.is_open()) return;
@@ -87,6 +99,18 @@ ConfigParser::ConfigParser(ifstream& configFile) {
   configFile.close();
 }
 
+/**
+ * Template specialization for retrieving boolean configuration values.
+ *
+ * This function retrieves a specific boolean configuration value from a section and configuration 
+ * name. The value is parsed as either `true` (for "true", "TRUE", or "1") or `false` (for "false", 
+ * "FALSE", or "0"). If the value does not match any of these, the function defaults to `false`.
+ *
+ * @param section The section name in the configuration file.
+ * @param configName The key within the section.
+ * @param pos The position of the value in the vector (if there are multiple values).
+ * @return `true` if the configuration value is recognized as true, otherwise `false`.
+ */
 template <>
 bool ConfigParser::aConfig<bool>(std::string section, std::string configName, size_t pos) {
 
@@ -109,6 +133,17 @@ bool ConfigParser::aConfig<bool>(std::string section, std::string configName, si
     return false;
 }
 
+/**
+ * Template specialization for retrieving a vector of boolean configuration values.
+ *
+ * This function retrieves a vector of boolean values associated with a configuration key in a section. 
+ * Each value is parsed as either `true` (for "true", "TRUE", or "1") or `false` (for "false", 
+ * "FALSE", or "0"). If a value does not match any of these, it defaults to `false`.
+ *
+ * @param section The section name in the configuration file.
+ * @param configName The key within the section.
+ * @return A vector of boolean values parsed from the configuration.
+ */
 template <>
 std::vector<bool> ConfigParser::aConfigVec<bool>(std::string section, std::string configName) {
 
@@ -137,6 +172,10 @@ std::vector<bool> ConfigParser::aConfigVec<bool>(std::string section, std::strin
   return tmp;
 }
 
+/**
+ * Handles missing configuration keys by triggering an error.
+ *
+ */
 void ConfigParser::handleMissingKey (std::string error) {
     argparse::ERROR_NO_USAGE(error.c_str());
 }

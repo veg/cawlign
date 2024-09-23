@@ -20,6 +20,10 @@ long StringBuffer::sbDefaultLength = 16, StringBuffer::sbDefaultBoost = 16,
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Initializes an empty `StringBuffer` with a default initial capacity.
+ * This buffer dynamically grows as new characters are appended.
+ */
 StringBuffer::StringBuffer(void) {
   sLength = 0;
   saLength = StringBuffer::sbDefaultLength;
@@ -30,6 +34,13 @@ StringBuffer::StringBuffer(void) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Swaps the contents of this `StringBuffer` with another `StringBuffer`.
+ *
+ * This function exchanges the data, length, and capacity of two `StringBuffer` objects.
+ *
+ * @param src The `StringBuffer` object to swap with.
+ */
 void StringBuffer::swap(StringBuffer &src) {
   long t;
   SWAP(sLength, src.sLength, t);
@@ -41,6 +52,9 @@ void StringBuffer::swap(StringBuffer &src) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Reverses the content of the `StringBuffer`.
+ */
 void StringBuffer::flip (void) {
     long half = sLength >> 1;
     const long lm1 = sLength - 1L;
@@ -54,11 +68,19 @@ void StringBuffer::flip (void) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Frees the memory allocated for the string buffer.
+ */
 StringBuffer::~StringBuffer(void) { free(sData); }
 
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Appends a single character to the end of the buffer, growing the buffer if needed.
+ *
+ * @param c The character to append.
+ */
 void StringBuffer::appendChar(const char c) {
   long addThis;
   if (saLength == sLength) {
@@ -75,6 +97,12 @@ void StringBuffer::appendChar(const char c) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Appends a string or a buffer of specified length to the `StringBuffer`.
+ *
+ * @param buffer The string or character buffer to append.
+ * @param length The length of the buffer, if known. If not, the length is inferred using `strlen`.
+ */
 void StringBuffer::appendBuffer(const char *buffer, const long length) {
   long addThis, pl = length > 0 ? length : strlen(buffer);
 
@@ -100,6 +128,11 @@ void StringBuffer::appendBuffer(const char *buffer, const long length) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Resets the `StringBuffer` to an empty state.
+ *
+ * Clears the buffer content by resetting its length, but keeps the allocated memory.
+ */
 void StringBuffer::resetString(void) {
   sLength = 0;
   sData[sLength] = 0;
@@ -108,6 +141,9 @@ void StringBuffer::resetString(void) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Initializes an empty vector of `long` values with a default initial capacity.
+ */
 Vector::Vector(void) {
   vLength = 0;
   vaLength = Vector::vDefaultLength;
@@ -117,6 +153,13 @@ Vector::Vector(void) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Swaps the contents of this `Vector` with another `Vector`.
+ *
+ * Exchanges the data, length, and capacity of two `Vector` objects.
+ *
+ * @param src The `Vector` object to swap with.
+ */
 void Vector::swap(Vector &src) {
   long t;
   SWAP(vLength, src.vLength, t);
@@ -128,6 +171,9 @@ void Vector::swap(Vector &src) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Frees the memory allocated for the vector data.
+ */
 Vector::~Vector(void) {
     free(vData);
 }
@@ -135,6 +181,13 @@ Vector::~Vector(void) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Appends a value to the `Vector`.
+ *
+ * Adds a `long` value to the end of the vector, growing the vector if needed.
+ *
+ * @param l The `long` value to append.
+ */
 void Vector::appendValue(const long l) {
   long addThis;
   if (vLength == vaLength) {
@@ -150,6 +203,11 @@ void Vector::appendValue(const long l) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Appends the contents of another `Vector` to this `Vector`.
+ *
+ * @param v The source `Vector` whose contents are to be appended.
+ */
 void Vector::appendVector(const Vector &v) {
   for (unsigned long k = 0UL; k < v.vLength; k++) {
     appendValue(v.vData[k]);
@@ -158,6 +216,14 @@ void Vector::appendVector(const Vector &v) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Stores a value at a specific index in the `Vector`.
+ *
+ * If the index is beyond the current capacity, the vector grows to accommodate the value.
+ *
+ * @param v The `long` value to store.
+ * @param l The index at which to store the value.
+ */
 void Vector::storeValue(const long v, const unsigned long l) {
   long addThis;
   if (l >= vaLength) {
@@ -174,6 +240,12 @@ void Vector::storeValue(const long v, const unsigned long l) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Retrieves a value from the `Vector` at the specified index.
+ *
+ * @param idx The index from which to retrieve the value.
+ * @return The value stored at the specified index.
+ */
 long Vector::value(const long idx) const {
   /*if (idx >= vLength) {
     cerr << "Indexing past the end of a vector" << endl;
@@ -185,6 +257,12 @@ long Vector::value(const long idx) const {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Stores a pointer to a `Vector` at a specified index, growing the vector if necessary.
+ *
+ * @param v The `Vector` object to store.
+ * @param l The index at which to store the vector.
+ */
 void Vector::storeVector(const Vector &v, const unsigned long l) {
   if (l < vLength && vData[l])
     delete (Vector *)(vData[l]);
@@ -195,6 +273,11 @@ void Vector::storeVector(const Vector &v, const unsigned long l) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Removes the element at the given index and shifts the remaining elements to fill the gap.
+ *
+ * @param l The index of the element to remove.
+ */
 void Vector::remove(const unsigned long l) {
   if (l < vLength) {
     for (unsigned long k = l + 1; k < vLength; k++) {
@@ -207,6 +290,12 @@ void Vector::remove(const unsigned long l) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Extracts the minimum value from the vector based on a `VectorFP` of floating-point values.
+ *
+ * @param values The `VectorFP` of floating-point values to compare.
+ * @return The index of the minimum value, or `-1` if the vector is empty.
+ */
 long Vector::extractMin(VectorFP &values) {
   cawlign_fp current_min = DBL_MAX;
   long best_index = -1;
@@ -231,6 +320,13 @@ long Vector::extractMin(VectorFP &values) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Used by `qsort` to compare two `long` values.
+ *
+ * @param v1 Pointer to the first value.
+ * @param v2 Pointer to the second value.
+ * @return -1 if `v1` is less than `v2`, 1 if greater, and 0 if equal.
+ */
 int long_comp(const void *v1, const void *v2) {
   long l1 = *(long *)v1, l2 = *(long *)v2;
   if (l1 < l2)
@@ -243,6 +339,9 @@ int long_comp(const void *v1, const void *v2) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Sorts the `Vector` in ascending order.
+ */
 void Vector::sort(void) {
   qsort((void *)vData, vLength, sizeof(long), long_comp);
 }
@@ -250,11 +349,19 @@ void Vector::sort(void) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Resets the `Vector` to an empty state.
+ * 
+ * Clears the vector by resetting its length, but keeps the allocated memory.
+ */
 void Vector::resetVector(void) { vLength = 0; }
 
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Initializes an empty vector of floating-point values with a default initial capacity.
+ */
 VectorFP::VectorFP(void) {
   vLength = 0;
   vaLength = Vector::vDefaultLength;
@@ -264,11 +371,21 @@ VectorFP::VectorFP(void) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Frees the memory allocated for the floating-point vector data.
+ */
 VectorFP::~VectorFP(void) { free(vData); }
 
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Appends a floating-point value to the `VectorFP`.
+ *
+ * Adds a floating-point value to the end of the vector, growing the vector if needed.
+ *
+ * @param l The floating-point value to append.
+ */
 void VectorFP::appendValue(const cawlign_fp l) {
   long addThis;
   if (vLength == vaLength) {
@@ -284,6 +401,12 @@ void VectorFP::appendValue(const cawlign_fp l) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Appends multiple floating-point values to the `VectorFP`.
+ *
+ * @param l The array of floating-point values to append.
+ * @param N The number of values to append.
+ */
 void VectorFP::appendValues(const cawlign_fp* l, long N) {
     long addThis;
     
@@ -306,6 +429,14 @@ void VectorFP::appendValues(const cawlign_fp* l, long N) {
 /*----------------------------------------------------------------------------------------------------
  */
 
+/**
+ * Stores a floating-point value at a specific index in the `VectorFP`.
+ *
+ * If the index is beyond the current capacity, the vector grows to accommodate the value.
+ *
+ * @param v The floating-point value to store.
+ * @param l The index at which to store the value.
+ */
 void VectorFP::storeValue(const cawlign_fp v, const unsigned long l) {
   long addThis;
   if (l >= vaLength) {

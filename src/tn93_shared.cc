@@ -161,6 +161,20 @@ char validFlags [256];
 
   //---------------------------------------------------------------
 
+/**
+ * Initializes the valid character flags for nucleotide or amino acid sequences.
+ *
+ * This function sets up the `validFlags` array, which maps valid characters for 
+ * either nucleotide or amino acid sequences. The behavior changes depending on the 
+ * `doAminoAcid` flag. If `id_map` is true, the flags map to the character's ASCII value; 
+ * otherwise, they map to an index.
+ *
+ * If a subset of nucleotide resolution is provided, it marks ambiguous bases to be resolved.
+ *
+ * @param doAminoAcid A boolean flag indicating whether to initialize the flags for amino acids (true) or nucleotides (false).
+ * @param resolutionSubset A string representing a subset of nucleotide resolution characters, used to handle ambiguous characters. Can be nullptr for amino acids or no subset.
+ * @param id_map A boolean flag indicating whether to map characters to their ASCII values (true) or their indices in the valid character array (false).
+ */
 void initAlphabets (bool doAminoAcid, char * resolutionSubset, bool id_map) {
   for (int i = 0; i < 256; i++)
     validFlags [i] = -1;
@@ -199,7 +213,10 @@ void initAlphabets (bool doAminoAcid, char * resolutionSubset, bool id_map) {
 }
 
   //---------------------------------------------------------------
-
+/**
+ * Returns the character mapped to the given index in the valid character set.
+ *
+ */
 const char unmap_char (unsigned char c, bool do_aa) {
   return do_aa ? ValidCharsAA[c] : ValidChars[c];
 }
@@ -218,7 +235,10 @@ static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 /* prototypes */
 
 
-/* initializes mt[N] with a seed */
+/**
+ * Initializes mt[N] (Mersenne Twister pseudorandom number generator) with a given seed.
+ *
+ */
 void init_genrand(unsigned long s)
 {
   mt[0]= s & 0xffffffffUL;
@@ -235,7 +255,9 @@ void init_genrand(unsigned long s)
 }
 
 
-/* generates a random number on [0,0xffffffff]-interval */
+/**
+ * Generates a random 32-bit unsigned integer within the range [0, 0xffffffff].
+ */
 unsigned long genrand_int32(void)
 {
   unsigned long y;
@@ -248,6 +270,7 @@ unsigned long genrand_int32(void)
     if (mti == N+1)   /* if init_genrand() has not been called, */
       init_genrand(5489UL); /* a default initial seed is used */
     
+    // Generate numbers using bitwise operations
     for (kk=0; kk<N-M; kk++) {
       y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
       mt[kk] = mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
@@ -259,10 +282,10 @@ unsigned long genrand_int32(void)
     y = (mt[N-1]&UPPER_MASK)|(mt[0]&LOWER_MASK);
     mt[N-1] = mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
     
-    mti = 0;
+    mti = 0; /* Reset the index after generating the numbers */
   }
   
-  y = mt[mti++];
+  y = mt[mti++]; /* Get the next number from the state array */
   
   /* Tempering */
   y ^= (y >> 11);
@@ -276,6 +299,9 @@ unsigned long genrand_int32(void)
 
   //---------------------------------------------------------------
 
+/**
+ * Returns the count of resolutions for a given character.
+ */
 const double resolution_count (unsigned char c, bool do_aa) {
   
   if (do_aa) {
@@ -287,6 +313,9 @@ const double resolution_count (unsigned char c, bool do_aa) {
 
   //---------------------------------------------------------------
 
+/**
+ * Calculates the length of a string within a vector of lengths.
+ */
 long stringLength (Vector& lengths, unsigned long index)
 {
   if (index < lengths.length() - 1)
@@ -297,6 +326,11 @@ long stringLength (Vector& lengths, unsigned long index)
 
   //---------------------------------------------------------------
 
+/**
+ * Retrieves the text of a string from a buffer based on its index. 
+ * The buffer contains concatenated strings, and their lengths are stored in a 
+ * separate vector.
+ */
 char* stringText (const StringBuffer& strings, const Vector& lengths, unsigned long index)
 {
   if (index < lengths.length() - 1L) 
@@ -309,6 +343,15 @@ char* stringText (const StringBuffer& strings, const Vector& lengths, unsigned l
 
   //---------------------------------------------------------------
 
+/**
+ * Adds a sequence to a list of sequences, ensuring consistent length.
+ *
+ * @param sequences A buffer containing concatenated sequences.
+ * @param seqLengths A vector storing the lengths of each sequence.
+ * @param firstSequenceLength A reference to store the length of the first sequence.
+ * @param names A buffer containing concatenated sequence names.
+ * @param nameLengths A vector storing the lengths of each sequence name.
+ */
 void addASequenceToList (StringBuffer& sequences, Vector& seqLengths, long &firstSequenceLength, StringBuffer& names, Vector& nameLengths)
 {
   sequences.appendChar ('\0');
@@ -336,6 +379,33 @@ void addASequenceToList (StringBuffer& sequences, Vector& seqLengths, long &firs
 
   //---------------------------------------------------------------
 
+/**
+ * Reads sequences from a FASTA file and processes them based on the specified options.
+ *
+ * This function reads sequences from a given FASTA file stream (`F`) and processes them 
+ * into buffers for names, sequences, and lengths. It supports both batch and one-by-one 
+ * sequence processing, and allows filtering based on an inclusion probability. Sequence 
+ * instances (if provided) track how many times each sequence should be included based 
+ * on a delimiter character. The function also supports progress reporting for large files.
+ *
+ * @param F The file stream pointer from which the FASTA sequences are read.
+ * @param automatonState The current state of the finite automaton controlling the reading process (0, 1, or 2).
+ * @param names A buffer to store sequence names.
+ * @param sequences A buffer to store the actual sequences.
+ * @param nameLengths A vector to store the lengths of the sequence names.
+ * @param seqLengths A vector to store the lengths of the sequences.
+ * @param firstSequenceLength A reference to store the length of the first sequence for length consistency checking.
+ * @param oneByOne If true, the function processes sequences one at a time, resetting buffers after each sequence.
+ * @param sequenceInstances A vector to store the number of instances for each sequence (if applicable). Can be `nullptr`.
+ * @param sep The separator character used to detect sequence instances in sequence names.
+ * @param include_prob A probability between 0 and 1 to determine whether sequences should be included. If less than 1, sequences are randomly filtered.
+ * @param progress If true, progress information is printed during processing.
+ * @return An integer indicating the status of the read operation:
+ *         - 0: End of file or successful read of all sequences.
+ *         - 1: An error occurred during processing.
+ *         - 2: Sequence successfully read in one-by-one mode.
+ *         - 3: Sequence successfully read and processed at the end of the file.
+ */
 int readFASTA (FILE* F, char& automatonState,  StringBuffer &names, 
                StringBuffer& sequences, Vector &nameLengths, Vector &seqLengths, 
                long& firstSequenceLength, bool oneByOne, 

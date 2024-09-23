@@ -15,6 +15,17 @@ using namespace argparse;
 
 //---------------------------------------------------------------
 
+/**
+ * The main entry point for the cawlign tool.
+ *
+ * This function initializes command-line arguments, parses the reference sequence from a FASTA file,
+ * and aligns query sequences against the reference using either codon or nucleotide scoring.
+ * Supports parallel processing using OpenMP.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv The array of command-line arguments.
+ * @return 0 on successful execution, non-zero on error.
+ */
 int main (int argc, const char * argv[]) {
 
     args_t args = args_t (argc, argv);
