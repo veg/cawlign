@@ -83,7 +83,12 @@ void version()
     exit( 0 );
 }
 
-
+/**
+ * Prints an error message to stderr and terminates the program.
+ *
+ * @param msg The format string for the error message, similar to printf formatting.
+ * @param ... The additional arguments corresponding to the format specifiers in the `msg` string.
+ */
 inline
 void ERROR( const char * msg, ... )
 {
@@ -96,6 +101,12 @@ void ERROR( const char * msg, ... )
     exit( 1 );
 }
 
+/**
+ * Prints an error message to stderr and terminates the program without printing usage information.
+ *
+ * @param msg The format string for the error message, similar to printf formatting.
+ * @param ... The additional arguments corresponding to the format specifiers in the `msg` string.
+ */
 void ERROR_NO_USAGE ( const char * msg, ... )
 {
     va_list args;
@@ -107,6 +118,13 @@ void ERROR_NO_USAGE ( const char * msg, ... )
     exit( 1 );
 }
 
+/**
+ * Checks if a file exists at the given path, and if not, attempts to find it in a subpath of the library.
+ *
+ * @param path The path to the file.
+ * @param subpath The subpath within the library where the file may be located.
+ * @return A pointer to a FILE if the file is found, or NULL if not.
+ */
 FILE* check_file_path (const char* path, const char * subpath) {
     FILE * test = fopen (path, "rb");
     if (!test) {
@@ -123,6 +141,13 @@ FILE* check_file_path (const char* path, const char * subpath) {
     return test;
 }
 
+/**
+ * Checks if a file exists at the given path (using C++ streams), and if not, attempts to find it in a subpath of the library.
+ *
+ * @param path The path to the file.
+ * @param subpath The subpath within the library where the file may be located.
+ * @return An ifstream object with the file opened if found, or not opened if the file does not exist.
+ */
 ifstream check_file_path_stream (const char* path, const char * subpath) {
     ifstream test;
     test.open (path);
@@ -140,6 +165,14 @@ ifstream check_file_path_stream (const char* path, const char * subpath) {
     return test;
 }
 
+/**
+ * Retrieves the next argument from the command-line arguments.
+ *
+ * @param i The current index in the argument list, which will be incremented.
+ * @param argc The total number of command-line arguments.
+ * @param argv The array of command-line arguments.
+ * @return The next command-line argument.
+ */
 const char * next_arg (int& i, const int argc, const char * argv[]) {
     i++;
     if (i == argc)
@@ -149,6 +182,16 @@ const char * next_arg (int& i, const int argc, const char * argv[]) {
     
 }
 
+/**
+ * Constructor for args_t, which parses command-line arguments and sets up configuration options.
+ *
+ * This constructor processes the command-line arguments, setting up the program's input, output,
+ * reference files, and various other configuration options such as data type, space type, and output format.
+ * If necessary, default values are assigned to some options.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv The array of command-line arguments.
+ */
 args_t::args_t( int argc, const char * argv[] ) :
 output (stdout),
 reference (nullptr),
@@ -199,6 +242,10 @@ include_reference (false) {
     }
 }
 
+/**
+ * Destructor for args_t, responsible for cleaning up any resources used (files or memory).
+ * It closes the input/output/reference files and deletes the scores object, if applicable.
+ */
 args_t::~args_t() {
     if ( output && output != stdout )
         fclose( output );
@@ -214,7 +261,12 @@ args_t::~args_t() {
     }
 }
 
-
+/**
+ * Parses the output file path from a command-line argument.
+ * Opens the output file for writing. If the argument is "-", stdout is used.
+ *
+ * @param str The path to the output file.
+ */
 void args_t::parse_output( const char * str )
 {
     if ( str && strcmp( str, "-" ) )
@@ -226,6 +278,12 @@ void args_t::parse_output( const char * str )
         ERROR( "failed to open the OUTPUT file %s", str );
 }
 
+/**
+ * Parses the input file path from a command-line argument.
+ * Opens the input file for reading. If the argument is "-", stdin is used.
+ *
+ * @param str The path to the input file.
+ */
 void args_t::parse_input( const char * str )
 {
     if ( str && strcmp( str, "-" ) )
@@ -237,6 +295,12 @@ void args_t::parse_input( const char * str )
         ERROR( "failed to open the INPUT file %s", str );
 }
 
+/**
+ * Parses the reference file path from a command-line argument.
+ * Attempts to open the reference file in the given subpath.
+ *
+ * @param str The path to the reference file.
+ */
 void args_t::parse_reference ( const char * str ) {
     if ( str ) {
         reference = check_file_path (str, REF_SUBPATH);
@@ -245,6 +309,12 @@ void args_t::parse_reference ( const char * str ) {
     }
 }
 
+/**
+ * Parses the scores file path from a command-line argument.
+ * Opens the scores file using an ifstream and initializes a ConfigParser.
+ *
+ * @param str The path to the scores file.
+ */
 void args_t::parse_scores ( const char * str ) {
     if ( str ) {
         ifstream score_stream = check_file_path_stream(str, SCORES_SUBPATH);
@@ -255,6 +325,12 @@ void args_t::parse_scores ( const char * str ) {
     }
 }
 
+/**
+ * Parses the space type from a command-line argument.
+ * Valid options are "linear" or "quadratic".
+ *
+ * @param str The space type argument.
+ */
 void args_t::parse_space_t( const char * str ) {
     if (!strcmp (str, "linear")) {
         space_type = linear;
@@ -265,6 +341,12 @@ void args_t::parse_space_t( const char * str ) {
     }
 }
 
+/**
+ * Parses the data type from a command-line argument.
+ * Valid options are "nucleotide", "codon", or "protein".
+ *
+ * @param str The data type argument.
+ */
 void args_t::parse_data_t( const char * str ) {
     if (!strcmp (str, "nucleotide")) {
         data_type = nucleotide;
@@ -277,6 +359,12 @@ void args_t::parse_data_t( const char * str ) {
     }
 }
 
+/**
+ * Parses the local alignment type from a command-line argument.
+ * Valid options are "trim", "global", or "local".
+ *
+ * @param str The local type argument.
+ */
 void args_t::parse_local_t( const char * str ) {
     if (!strcmp (str, "trim")) {
         local_option = trim;
@@ -289,7 +377,12 @@ void args_t::parse_local_t( const char * str ) {
     }
 }
 
-
+/**
+ * Parses the output format type from a command-line argument.
+ * Valid options are "refmap", "refalign", or "pairwise".
+ *
+ * @param str The output format argument.
+ */
 void args_t::parse_out_format_t( const char * str ) {
     if (!strcmp (str, "refmap")) {
         out_format = refmap;
@@ -302,15 +395,23 @@ void args_t::parse_out_format_t( const char * str ) {
     }
 }
 
+/**
+ * Enables the inclusion of the reference file in the output.
+ */
 void args_t::parse_include_ref() {
     include_reference = true;
 }
 
+/**
+ * Disables the affine flag, indicating a non-affine alignment.
+ */
 void args_t::parse_affine() {
     affine = false;
 }
 
-
+/**
+ * Enables quiet mode, suppressing certain outputs.
+ */
 void args_t::parse_quiet() {
     quiet = true;
 }
