@@ -1492,28 +1492,63 @@ cawlign_fp AlignStrings( char const * r_str
 
 //____________________________________________________________________________________
 
-cawlign_fp   CostOnly   (  const char * s1,                  // first string
-                        const char * s2,                  // second string
-                        const long s1L,                   // length of S1
-                        const long s2L,                   // length of S2
-                        long from1,                       // start here in string1
-                        long from2,                       // start here in string2
-                        long to1,                         // up to here in string1 // not inclusive
-                        long to2,                         // up to here in string2 // not inclusive
-                        bool rev1,                        // reverse string1
-                        bool rev2,                        // reverse string2
-                        long*  cmap,                      // char -> position in scoring matrix mapper
-                        cawlign_fp const * ccost,             // NxN matrix of edit distances on characters
-                        const  long    mapL,              // dimension of ccost
-                        cawlign_fp gopen,                     // the cost of opening a gap in sequence 1
-                        cawlign_fp gextend,                   // the cost of extending a gap in sequence 1 (ignored unless doAffine == true)
-                        cawlign_fp gopen2,                    // the cost of opening a gap in sequence 2
-                        cawlign_fp gextend2,                  // the cost of opening a gap in sequence 2   (ignored unless doAffine == true)
-                        bool doLocal,                     // ignore prefix and suffix gaps
-                        bool doAffine,                    // use affine gap penalties
-                        cawlign_fp * scoreMatrix,             // where to write the last row of the scoring matrix
-                        cawlign_fp * gapScore1,               // where to write the last row of open gap in 1st sequence matrix (ignored unless doAffine == true)
-                        cawlign_fp * gapScore2,               // same but for open gap in 2nd sequence matrix
+/**
+ * Computes the alignment score between two sequences using affine or linear gap penalties.
+ *
+ * Calculates the alignment score for two sequences, `s1` and `s2`, based on the 
+ * specified scoring matrix and gap penalties. Optionally supports local alignments (ignoring 
+ * prefix and suffix gaps) and affine gap penalties (distinct gap opening and extension costs).
+ * Allows alignment of reversed sequences and returns the computed score along 
+ * with how the alignment was achieved.
+ *
+ * @param s1 The first sequence (as a character array).
+ * @param s2 The second sequence (as a character array).
+ * @param s1L Length of the first sequence (`s1`).
+ * @param s2L Length of the second sequence (`s2`).
+ * @param from1 The starting index in the first sequence for the alignment.
+ * @param from2 The starting index in the second sequence for the alignment.
+ * @param to1 The ending index (exclusive) in the first sequence for the alignment.
+ * @param to2 The ending index (exclusive) in the second sequence for the alignment.
+ * @param rev1 If `true`, align the first sequence in reverse.
+ * @param rev2 If `true`, align the second sequence in reverse.
+ * @param cmap Character-to-position mapping in the scoring matrix.
+ * @param ccost Scoring matrix for character-to-character match/mismatch scores.
+ * @param mapL Dimension of the scoring matrix `ccost`.
+ * @param gopen Gap opening penalty for the first sequence.
+ * @param gextend Gap extension penalty for the first sequence.
+ * @param gopen2 Gap opening penalty for the second sequence.
+ * @param gextend2 Gap extension penalty for the second sequence.
+ * @param doLocal If `true`, perform local alignment (ignoring prefix and suffix gaps).
+ * @param doAffine If `true`, use affine gap penalties (distinct opening and extension penalties).
+ * @param scoreMatrix Matrix to store the last row of the alignment scores.
+ * @param gapScore1 Matrix to store gap penalties for the first sequence (used if `doAffine` is `true`).
+ * @param gapScore2 Matrix to store gap penalties for the second sequence (used if `doAffine` is `true`).
+ * @param secondGap If `true`, align with a gap in the second sequence.
+ * @param howAchieved Array that records how each position in the alignment was achieved (match, insert, or delete).
+ * @return The alignment score for the two sequences.
+ */
+cawlign_fp   CostOnly   (  const char * s1,
+                        const char * s2,
+                        const long s1L,
+                        const long s2L,
+                        long from1,
+                        long from2,
+                        long to1,
+                        long to2,
+                        bool rev1,
+                        bool rev2,
+                        long*  cmap,
+                        cawlign_fp const * ccost,
+                        const  long    mapL,
+                        cawlign_fp gopen,
+                        cawlign_fp gextend,
+                        cawlign_fp gopen2,
+                        cawlign_fp gextend2,
+                        bool doLocal,
+                        bool doAffine,
+                        cawlign_fp * scoreMatrix,
+                        cawlign_fp * gapScore1,
+                        cawlign_fp * gapScore2,
                         char secondGap,
                         char * howAchieved
                      )
@@ -1798,27 +1833,59 @@ cawlign_fp   CostOnly   (  const char * s1,                  // first string
 
 //____________________________________________________________________________________
 
-cawlign_fp      LinearSpaceAlign (   const char    *s1,          // first string
-                                  const char    *s2,          // second string
-                                  const long    s1L,          // length of s1
-                                  const long    s2L,          // length of s2
+/**
+ * Performs sequence alignment in linear space, reducing memory usage for long sequences.
+ *
+ * This function implements the Needleman-Wunsch algorithm with affine or linear gap penalties
+ * while keeping memory usage low by only storing a small portion of the alignment matrix. It uses
+ * a divide-and-conquer approach to calculate the optimal alignment between `s1` and `s2`.
+ * It supports both local alignments (ignoring prefix and suffix gaps) and affine gap penalties.
+ *
+ * @param s1 The first sequence (as a character array).
+ * @param s2 The second sequence (as a character array).
+ * @param s1L Length of the first sequence (`s1`).
+ * @param s2L Length of the second sequence (`s2`).
+ * @param cmap Character-to-position mapping in the scoring matrix.
+ * @param ccost Scoring matrix for character-to-character match/mismatch scores.
+ * @param costD Dimension of the scoring matrix `ccost`.
+ * @param gopen Gap opening penalty for the first sequence.
+ * @param gextend Gap extension penalty for the first sequence.
+ * @param gopen2 Gap opening penalty for the second sequence.
+ * @param gextend2 Gap extension penalty for the second sequence.
+ * @param doLocal If `true`, perform local alignment (ignoring prefix and suffix gaps).
+ * @param doAffine If `true`, use affine gap penalties (distinct opening and extension penalties).
+ * @param ops Array to store the optimal alignment operations (edit steps).
+ * @param scoreCheck Variable to check the final score of the alignment.
+ * @param from1 Starting index in the first sequence.
+ * @param to1 Ending index (exclusive) in the first sequence.
+ * @param from2 Starting index in the second sequence.
+ * @param to2 Ending index (exclusive) in the second sequence.
+ * @param buffer Matrix storage for the alignment computation.
+ * @param parentGapLink Keeps track of the previous gap state (to decide whether to continue or close a gap).
+ * @param ha Array that stores how the alignment was achieved (match, insert, or delete).
+ * @return The alignment score for the two sequences.
+ */
+cawlign_fp      LinearSpaceAlign (   const char    *s1,
+                                  const char    *s2,
+                                  const long    s1L,
+                                  const long    s2L,
 
-                                  long        * cmap,         // char -> position in scoring matrix mapper
-                                  cawlign_fp const* ccost,        // NxN matrix of edit distances on characters
-                                  const long    costD,        // dimension N in ccost
-                                  cawlign_fp        gopen,        // the cost of opening a gap in sequence 1
-                                  cawlign_fp        gextend,      // the cost of extending a gap in sequence 1 (ignored unless doAffine == true)
-                                  cawlign_fp        gopen2,       // the cost of opening a gap in sequence 2
-                                  cawlign_fp        gextend2,     // the cost of opening a gap in sequence 2   (ignored unless doAffine == true)
-                                  bool          doLocal,      // ignore prefix and suffix gaps
-                                  bool          doAffine,     // use affine gap penalties
-                                  long*         ops,          // edit operations for the optimal alignment
-                                  cawlign_fp        scoreCheck,   // check the score of the alignment
+                                  long        * cmap,
+                                  cawlign_fp const* ccost,
+                                  const long    costD,
+                                  cawlign_fp        gopen,
+                                  cawlign_fp        gextend,
+                                  cawlign_fp        gopen2,
+                                  cawlign_fp        gextend2,
+                                  bool          doLocal,
+                                  bool          doAffine,
+                                  long*         ops,
+                                  cawlign_fp        scoreCheck,
                                   long          from1,
                                   long          to1,
                                   long          from2,
                                   long          to2,
-                                  cawlign_fp        **buffer,     // matrix storage,
+                                  cawlign_fp        **buffer,
                                   char          parentGapLink,
                                   char          *ha
                                   )
@@ -1830,35 +1897,6 @@ cawlign_fp      LinearSpaceAlign (   const char    *s1,          // first string
     long                    midpoint = (from1 + to1)/2,
     span     = to2-from2,
     span1     = to1-from1;
-    
-    /*
-     hyFloat   CostOnly   (  const char * s1,                  // first string
-                             const char * s2,                  // second string
-                             const long s1L,                   // length of S1
-                             const long s2L,                   // length of S2
-                             long from1,                       // start here in string1
-                             long from2,                       // start here in string2
-                             long to1,                         // up to here in string1 // not inclusive
-                             long to2,                         // up to here in string2 // not inclusive
-                             bool rev1,                        // reverse string1
-                             bool rev2,                        // reverse string2
-                             long*  cmap,                      // char -> position in scoring matrix mapper
-                             cawlign_fp const * ccost,             // NxN matrix of edit distances on characters
-                             const  long    mapL,              // dimension of ccost
-                             cawlign_fp gopen,                     // the cost of opening a gap in sequence 1
-                             cawlign_fp gextend,                   // the cost of extending a gap in sequence 1 (ignored unless doAffine == true)
-                             cawlign_fp gopen2,                    // the cost of opening a gap in sequence 2
-                             cawlign_fp gextend2,                  // the cost of opening a gap in sequence 2   (ignored unless doAffine == true)
-                             bool doLocal,                     // ignore prefix and suffix gaps
-                             bool doAffine,                    // use affine gap penalties
-                             cawlign_fp * scoreMatrix,             // where to write the last row of the scoring matrix
-                             cawlign_fp * gapScore1,               // where to write the last row of open gap in 1st sequence matrix (ignored unless doAffine == true)
-                             cawlign_fp * gapScore2,               // same but for open gap in 2nd sequence matrix
-                             char secondGap,
-                             char * howAchieved
-                          )
-
-     */
 
     if                      (span1 > 1) {
         CostOnly                (s1,

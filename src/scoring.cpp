@@ -18,7 +18,15 @@ const cawlign_fp kNucScoring[] = {5.,-4.,-4.,-4.,-5.,
 
 
 
-
+/**
+ * Initializes the character map for the scoring matrix.
+ *
+ * This function populates the `char_map` array, mapping each character in the alphabet
+ * to its index in the scoring matrix. Characters not in the alphabet are assigned
+ * a value of `not_found`.
+ *
+ * @param not_found The value to assign for characters not found in the alphabet.
+ */
 void CawalignSimpleScores::_init_alphabet (long not_found) {
     for (int i = 0; i < 255; i++) {
         char_map [i] = not_found;
@@ -28,6 +36,19 @@ void CawalignSimpleScores::_init_alphabet (long not_found) {
     }
 }
 
+/**
+ * Constructs a `CawalignSimpleScores` object with a custom alphabet and scoring matrix.
+ *
+ * This constructor initializes the scoring system with a user-specified alphabet and scoring matrix,
+ * as well as gap penalties for both reference and query sequences. Throws an error if the alphabet is empty.
+ *
+ * @param _alphabet The alphabet for scoring (e.g., nucleotides or amino acids).
+ * @param _scoring_matrix A pointer to the scoring matrix values.
+ * @param _open_gap_reference Gap opening penalty for reference sequences.
+ * @param _open_gap_query Gap opening penalty for query sequences.
+ * @param _extend_gap_reference Gap extension penalty for reference sequences.
+ * @param _extend_gap_query Gap extension penalty for query sequences.
+ */
 CawalignSimpleScores::CawalignSimpleScores (
                                       const char * _alphabet,
                                       const cawlign_fp * _scoring_matrix,
@@ -54,6 +75,14 @@ CawalignSimpleScores::CawalignSimpleScores (
         
 }
 
+/**
+ * Constructs a `CawalignSimpleScores` object using configuration settings.
+ *
+ * This constructor reads configuration values from a `ConfigParser` to initialize the alphabet,
+ * scoring matrix, and gap penalties. Throws errors if the alphabet is missing or the scoring matrix dimensions are incorrect.
+ *
+ * @param settings A pointer to a `ConfigParser` object containing configuration settings.
+ */
 CawalignSimpleScores::CawalignSimpleScores (
                                       ConfigParser * settings
                                       ) :
@@ -79,11 +108,17 @@ CawalignSimpleScores::CawalignSimpleScores (
     extend_gap_query      = settings->aConfig<cawlign_fp>("PARAMETERS", "extend_insertion");
 }
 
+/**
+ * Calculates the number of nucleotide differences between two codons.
+ */
 int CawalignCodonScores::nucleotide_diff (long c1, long c2) {
     long diff = c1 ^ c2; // exclusive OR to set differences
     return ((diff & 0x03) ? 1 : 0) + ((diff & 0xC) ? 1 : 0) + ((diff & 0x30) ? 1 : 0);
 }
 
+/**
+ * Converts a codon represented as a long integer into a string.
+ */
 StringBuffer codon_string (long c1) {
     StringBuffer codon;
     codon.appendChar(kNucleotideAlphabet[(c1 & 0x30) >> 4]);
@@ -92,6 +127,15 @@ StringBuffer codon_string (long c1) {
     return codon;
 }
 
+/**
+ * Constructs a `CawalignCodonScores` object using configuration settings.
+ *
+ * This constructor initializes the codon scoring system using values from a `ConfigParser`.
+ * It sets up the codon translation table, stop codon index, mismatch index, and scoring matrices for codon alignments.
+ * Throws errors if the amino acid alphabet is incomplete or the translation table is invalid.
+ *
+ * @param settings A pointer to a `ConfigParser` object containing configuration settings.
+ */
 CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
     alphabet.appendBuffer(kNucleotideAlphabet);
     
