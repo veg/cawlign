@@ -226,5 +226,5 @@ GCGCCCGAACAGGGACTTGAAAGCGAAAGTGAGACCAGAGAAGATCTCTCGACGCAGGACTCGGCTTGCTGAAGTGCACT
 ```
 ### Detailed code documentation
 
-Doxygen generated documentation can be found [here](docs/html/index.html)
+Doxygen generated documentation can be found [here](https://veg.github.io/cawlign/html/index.html)
 
