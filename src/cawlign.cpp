@@ -12,6 +12,10 @@
 using namespace std;
 using namespace argparse;
 
+const char      rc_tag []   = "|RC";
+const char      empty_tag[] = "";
+
+
 
 //---------------------------------------------------------------
 
@@ -34,6 +38,12 @@ int main (int argc, const char * argv[]) {
     
     if (args.out_format == refalign) {
         ERROR_NO_USAGE ("This output mode is currently not implemented.");
+    }
+    
+    if (args.reverse_complement != none) {
+        if (args.data_type == protein) {
+            ERROR_NO_USAGE ("Reverse complement options other than 'none' are not compatible with the protein data type.");
+        }
     }
 
     char automatonState = 0,
@@ -98,8 +108,8 @@ int main (int argc, const char * argv[]) {
     fasta_result   = 2;
     
     VectorFP   scoreCache,
-                   insertCache,
-                   deleteCache;
+               insertCache,
+               deleteCache;
     
     #pragma omp parallel shared (automatonState, fasta_result, sequences_read, sequences_written, args, refName, refSequence, alignmentScoring) private (nameLengths, seqLengths, names, sequences, scoreCache,insertCache,deleteCache)
     while (fasta_result == 2) {
@@ -110,7 +120,9 @@ int main (int argc, const char * argv[]) {
         Vector       nameLengths,
                      seqLengths;
             
-        long         sequenceLength = 0;
+        long           sequenceLength = 0;
+        const   char * rc_seq_tag = empty_tag;
+        
         #pragma omp critical
         {
             fasta_result = readFASTA (args.input, automatonState, names, sequences, nameLengths, seqLengths, sequenceLength, true);
@@ -120,6 +132,20 @@ int main (int argc, const char * argv[]) {
             }
         }
         
+        auto handle_rc = [&] (cawlign_fp direct_score, cawlign_fp rc_score, char*& rd, char*& qd, char *rr, char *qr) {
+            if (rc_score > direct_score) {
+                rc_seq_tag = args.reverse_complement == annotated ? rc_tag : empty_tag;
+                if (rd) delete [] rd;
+                if (qd) delete [] qd;
+                qd = qr;
+                rd = rr;
+            } else {
+                reverseComplement(sequences, 0, sequenceLength-1);
+                if (rr) delete [] rr;
+                if (qr) delete [] qr;
+            }
+        };
+        
         if (fasta_result == 2 || (fasta_result == 3 && names.length() > 0)) {
             // read a non-trivial sequence
             char * alignedRefSeq = nullptr,
@@ -127,9 +153,11 @@ int main (int argc, const char * argv[]) {
             
             cawlign_fp score;
             
+             
+        
             if (args.data_type != data_t::codon) {
                 if (args.space_type == quadratic) {
-                    AlignStrings(
+                    cawlign_fp forward_score = AlignStrings(
                                          refSequence.getString(),
                                          sequences.getString(),
                                          referenceSequenceLength,
@@ -157,6 +185,42 @@ int main (int argc, const char * argv[]) {
                                          args.out_format != refmap
                                          );
                     
+                    if (args.reverse_complement != none) {
+                        reverseComplement(sequences, 0, sequenceLength-1);
+                        char * alignedRefSeqRC = nullptr,
+                             * alignedQrySeqRC = nullptr;
+                        
+                        cawlign_fp rc_score = AlignStrings(
+                                             refSequence.getString(),
+                                             sequences.getString(),
+                                             referenceSequenceLength,
+                                             sequenceLength,
+                                             alignedRefSeqRC,
+                                             alignedQrySeqRC,
+                                             alignmentScoring->char_map,
+                                             alignmentScoring->scoring_matrix.values(),
+                                             alignmentScoring->D+1,
+                                             alignmentScoring->gap_char,
+                                             alignmentScoring->open_gap_reference,
+                                             alignmentScoring->extend_gap_reference,
+                                             alignmentScoring->open_gap_query,
+                                             alignmentScoring->extend_gap_query,
+                                             0.,
+                                             args.local_option == trim,
+                                             args.affine,
+                                             false,
+                                             alignmentScoring->D,
+                                             nullptr,
+                                             nullptr,
+                                             nullptr,
+                                             nullptr,
+                                             args.local_option == local,
+                                             args.out_format != refmap
+                                             );
+                        
+                        handle_rc (forward_score, rc_score, alignedRefSeq, alignedQrySeq, alignedRefSeqRC, alignedQrySeqRC);
+                    }
+                    
                 } else { // linear space
                     const unsigned long   size_allocation = sequenceLength+1;
                     
@@ -175,7 +239,7 @@ int main (int argc, const char * argv[]) {
                         ops[i] = -2;
                     }
                     
-                    LinearSpaceAlign (refSequence.getString(),
+                    cawlign_fp forward_score = LinearSpaceAlign (refSequence.getString(),
                                               sequences.getString(),
                                               referenceSequenceLength,
                                               sequenceLength,
@@ -199,10 +263,57 @@ int main (int argc, const char * argv[]) {
                                               alignment_route);
                     
                     
-                    
+                    if (args.reverse_complement != none) {
+                        reverseComplement(sequences, 0, sequenceLength-1);
+                        char          *alignment_route_rc = new char[2*size_allocation] {0};
+                        long          *ops_rc = new long [referenceSequenceLength + 2];
+                        ops_rc [0] = -1;
+                        ops_rc [referenceSequenceLength + 1] = sequenceLength;
+                        
+                        for (long i = 1L; i <= referenceSequenceLength; i++) {
+                            ops_rc [i] = -2;
+                        }
+                        
+                        cawlign_fp reverse_score = LinearSpaceAlign (refSequence.getString(),
+                                                  sequences.getString(),
+                                                  referenceSequenceLength,
+                                                  sequenceLength,
+                                                  alignmentScoring->char_map,
+                                                  alignmentScoring->scoring_matrix.values(),
+                                                  alignmentScoring->D+1,
+                                                  alignmentScoring->open_gap_reference,
+                                                  alignmentScoring->extend_gap_reference,
+                                                  alignmentScoring->open_gap_query,
+                                                  alignmentScoring->extend_gap_query,
+                                                  args.local_option == trim,
+                                                  args.affine,
+                                                  ops_rc,
+                                                  score,
+                                                  0,
+                                                  referenceSequenceLength,
+                                                  0,
+                                                  sequenceLength,
+                                                  data_buffers,
+                                                  0,
+                                                  alignment_route_rc);
+
+                        if (reverse_score > forward_score) {
+                            rc_seq_tag = args.reverse_complement == annotated ? rc_tag : empty_tag;
+                            delete [] alignment_route;
+                            delete [] ops;
+                            
+                            alignment_route = alignment_route_rc;
+                            ops = ops_rc;
+                            
+                        } else {
+                            reverseComplement(sequences, 0, sequenceLength-1);
+                            delete [] alignment_route_rc;
+                            delete [] ops_rc;
+                        }
+                    }
                     
                     StringBuffer     result1,
-                    result2;
+                                     result2;
                     
                     long             last_column     = ops[referenceSequenceLength + 1];
                     
@@ -306,7 +417,7 @@ int main (int argc, const char * argv[]) {
                     deleteCache.storeValue(0.,score_size-1);
                 }
                 
-                AlignStrings(
+                cawlign_fp forward_score = AlignStrings(
                                      refSequence.getString(),
                                      sequences.getString(),
                                      referenceSequenceLength,
@@ -337,13 +448,58 @@ int main (int argc, const char * argv[]) {
                                      deleteCache.rvalues()
                                      );
                 
+                if (args.reverse_complement != none) {
+                    reverseComplement(sequences, 0, sequenceLength-1);
+                    char * alignedRefSeqRC = nullptr,
+                         * alignedQrySeqRC = nullptr;
+                    
+                    scoreCache.storeValue(0.,score_size-1);
+                    if (args.affine) {
+                        insertCache.storeValue(0.,score_size-1);
+                        deleteCache.storeValue(0.,score_size-1);
+                    }
+                    
+                    cawlign_fp rc_score = AlignStrings(
+                                           refSequence.getString(),
+                                           sequences.getString(),
+                                           referenceSequenceLength,
+                                           sequenceLength,
+                                           alignedRefSeqRC,
+                                           alignedQrySeqRC,
+                                           alignmentScoring->char_map,
+                                           alignmentScoring->scoring_matrix.values(),
+                                           alignmentScoring->D+1,
+                                           alignmentScoring->gap_char,
+                                           alignmentScoring->open_gap_reference,
+                                           alignmentScoring->extend_gap_reference,
+                                           alignmentScoring->open_gap_query,
+                                           alignmentScoring->extend_gap_query,
+                                           codonScoring->frameshift_cost,
+                                           args.local_option == trim,
+                                           args.affine,
+                                           true,
+                                           4,
+                                           codonScoring->s3x5.values(),
+                                           codonScoring->s3x4.values(),
+                                           codonScoring->s3x2.values(),
+                                           codonScoring->s3x1.values(),
+                                           args.local_option == local,
+                                           args.out_format != refmap,
+                                           scoreCache.rvalues(),
+                                           insertCache.rvalues(),
+                                           deleteCache.rvalues()
+                                           );
+                    
+                    handle_rc (forward_score, rc_score, alignedRefSeq, alignedQrySeq, alignedRefSeqRC, alignedQrySeqRC);
+
+                }
             }
             
             if (alignedQrySeq) {
                 if (args.out_format == pairwise) {
 #pragma omp critical
                     {
-                        fprintf (args.output, ">%s\n%s\n>%s\n%s\n", refName.getString(), alignedRefSeq, names.getString(), alignedQrySeq);
+                        fprintf (args.output, ">%s\n%s\n>%s%s\n%s\n", refName.getString(), alignedRefSeq, names.getString(), rc_seq_tag, alignedQrySeq);
                     }
                     
                 } else {
@@ -354,7 +510,7 @@ int main (int argc, const char * argv[]) {
                                 fprintf (args.output, ">%s\n%s\n", refName.getString(), refSequence.getString());
                             }
                         }
-                        fprintf (args.output, ">%s\n%s\n", names.getString(), alignedQrySeq);
+                        fprintf (args.output, ">%s%s\n%s\n", names.getString(), rc_seq_tag, alignedQrySeq);
                     }
                     
                     

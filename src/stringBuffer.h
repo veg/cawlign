@@ -25,6 +25,13 @@ public:
       sLength = newL;
     }
   }
+
+  char setChar(const long i, const char c) {
+    char oc = sData[i];
+    sData[i] = c;
+    return oc;
+  }
+    
   char getChar(const long i) const { return sData[i]; }
   void flip (void);
   void detach (void) { sData = nullptr;}

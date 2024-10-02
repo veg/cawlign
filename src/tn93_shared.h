@@ -71,6 +71,7 @@ void merge_two_sequences (const char* source, char* target, const long sequence_
 long perfect_match (const char* source, char* target, const long sequence_length);
 void dump_fasta (const char* source, const long sequence_length, FILE* output, bool newln = true, bool = false, unsigned long from = 0L, unsigned long to = 0L);
 
+int    reverseComplement (StringBuffer& sequence, unsigned long from, unsigned long to);
 struct sequence_gap_structure describe_sequence (const char* source, const unsigned long sequence_length, const unsigned long char_count = 4UL);
 
 const long * resolve_char (unsigned char, bool = false, bool = true);

@@ -22,11 +22,11 @@ const  char ValidChars[]       = "ACGTURYSWKMBDHVN?",
             ValidCharsAA[]     = "ACDEFGHIKLMNPQRSTVWYBZX?";
             
 unsigned char   * resolveTheseAmbigs = (unsigned char   *)calloc (256,sizeof (unsigned char));
+char   * reverseComplementCharacters = (char   *)calloc (256,sizeof (char));
 
 double          resolve_fraction = 1.;
                   
 static char empty_string        [] = "";
-
 
 const long   resolutions [][4] = { {1,0,0,0},
   {0,1,0,0},
@@ -46,6 +46,8 @@ const long   resolutions [][4] = { {1,0,0,0},
   {1,1,1,1}, // RESOLVE_A | RESOLVE_C | RESOLVE_G | RESOLVE_T , // N - 15
   {1,1,1,1} //RESOLVE_A | RESOLVE_C | RESOLVE_G | RESOLVE_T , // ? - 16
 };
+
+
 
 
 
@@ -176,8 +178,11 @@ char validFlags [256];
  * @param id_map A boolean flag indicating whether to map characters to their ASCII values (true) or their indices in the valid character array (false).
  */
 void initAlphabets (bool doAminoAcid, char * resolutionSubset, bool id_map) {
-  for (int i = 0; i < 256; i++)
+    
+  for (int i = 0; i < 256; i++) {
     validFlags [i] = -1;
+    reverseComplementCharacters [i] = -1;
+  }
   
   if (doAminoAcid) {
     if (id_map) {
@@ -191,6 +196,43 @@ void initAlphabets (bool doAminoAcid, char * resolutionSubset, bool id_map) {
     
     
   } else {  
+     // set up reverse complements
+      
+      
+      const long   resolutions [][4] = { {1,0,0,0},
+        {0,1,0,0},
+        {0,0,1,0},
+        {0,0,0,1},
+        {0,0,0,1}, // U - 4
+        {1,0,1,0}, //RESOLVE_A | RESOLVE_G, // R - 5
+        {0,1,0,1}, //RESOLVE_C | RESOLVE_T, // Y - 6
+        {0,1,1,0}, //RESOLVE_C | RESOLVE_G, // S - 7
+        {1,0,0,1}, //RESOLVE_A | RESOLVE_T, // W - 8
+        {0,0,1,1}, //RESOLVE_G | RESOLVE_T, // K - 9
+        {1,1,0,0}, //RESOLVE_A | RESOLVE_C, // M - 10
+        {0,1,1,1}, // RESOLVE_C | RESOLVE_G | RESOLVE_T, // B - 11
+        {1,0,1,1}, //RESOLVE_A | RESOLVE_G | RESOLVE_T, // D - 12
+        {1,1,0,1}, //RESOLVE_A | RESOLVE_C | RESOLVE_T, // H - 13
+        {1,1,1,0}, // RESOLVE_A | RESOLVE_C | RESOLVE_G, // V - 14
+        {1,1,1,1}, // RESOLVE_A | RESOLVE_C | RESOLVE_G | RESOLVE_T , // N - 15
+        {1,1,1,1} //RESOLVE_A | RESOLVE_C | RESOLVE_G | RESOLVE_T , // ? - 16
+      };
+      
+     reverseComplementCharacters['A'] = 'T';
+     reverseComplementCharacters['C'] = 'G';
+     reverseComplementCharacters['G'] = 'C';
+     reverseComplementCharacters['T'] = 'A';
+     reverseComplementCharacters['N'] = 'N';
+     reverseComplementCharacters['?'] = '?';
+     reverseComplementCharacters['R'] = 'Y';
+     reverseComplementCharacters['Y'] = 'R';
+     reverseComplementCharacters['S'] = 'W';
+     reverseComplementCharacters['W'] = 'S';
+     reverseComplementCharacters['B'] = 'V';
+     reverseComplementCharacters['V'] = 'B';
+     reverseComplementCharacters['D'] = 'H';
+     reverseComplementCharacters['H'] = 'D';
+
      if (id_map) {
          for (unsigned int i = 0; i < strlen (ValidChars); i++)
           validFlags [(unsigned char)ValidChars[i]] = (unsigned char)ValidChars[i];
@@ -377,7 +419,7 @@ void addASequenceToList (StringBuffer& sequences, Vector& seqLengths, long &firs
 }
 
 
-  //---------------------------------------------------------------
+//---------------------------------------------------------------
 
 /**
  * Reads sequences from a FASTA file and processes them based on the specified options.
@@ -606,6 +648,38 @@ int readFASTA (FILE* F, char& automatonState,  StringBuffer &names,
       return 1;
   }
   return 0;
+}
+
+//---------------------------------------------------------------
+
+/**
+ * Reverse complement a nucleotide sequence (jn place).
+ *
+ * This function reads a capitalized IUPAC compliant string and performs reverse complementation
+ * It will generate return 1 if invalid characters are present in the sequence to RC; the original string data will be corrupted via partial RC
+ *
+ * @param sequences The string buffer object to use
+ * @param from start index of the string in the buffer
+ * @param to end index of the string in the buffer (inclusive!)
+ * @return 0 if success, otherwise non-zero
+ *
+ */
+int reverseComplement (StringBuffer& sequence, unsigned long from, unsigned long to) {
+    
+    for (unsigned long i = from, j = to; i <= j; i++, j--) {
+        char leading_char  = reverseComplementCharacters[sequence.getChar(i)],
+             trailing_char = reverseComplementCharacters[sequence.getChar(j)];
+    
+        if (leading_char > 0 && trailing_char > 0) {
+            sequence.setChar (i, trailing_char);
+            sequence.setChar (j, leading_char);
+        } else {
+            return 1;
+        }
+    }
+    
+    
+    return 0;
 }
 
 

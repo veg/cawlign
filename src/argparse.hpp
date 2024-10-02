@@ -13,6 +13,7 @@
 #define DEFAULT_SPACE            quadratic
 #define DEFAULT_LOCAL_TYPE       trim
 #define DEFAULT_OUTPUT_FORMAT    refmap
+#define DEFAULT_RC_TYPE          none
 
 #ifndef VERSION_NUMBER
     #define VERSION_NUMBER            "0.0.1"
@@ -51,6 +52,12 @@ namespace argparse
         pairwise
     };
 
+    enum rc_t {
+        none,
+        silent,
+        annotated
+    };
+
    class args_t {
     public:
  
@@ -64,6 +71,7 @@ namespace argparse
         local_t         local_option;
         space_t         space_type;
         out_format_t    out_format;
+        rc_t            reverse_complement;
         
         bool            quiet;
         bool            affine;
@@ -81,6 +89,7 @@ namespace argparse
         void parse_quiet        ( void );
         void parse_affine       ( void );
         void parse_include_ref  ( void );
+        void parse_rc           ( const char * );
         void parse_space_t      ( const char * );
         void parse_data_t       ( const char * );
         void parse_local_t      ( const char * );
