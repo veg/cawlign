@@ -18,7 +18,7 @@ jobs:
 
       # Install LaTeX (TeX Live for Linux)
       - name: Install LaTeX
-        run: sudo apt-get install -y texlive-full
+        run: sudo apt-get install -y texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-latex-recommended texlive-science
 
       # Install Graphviz (for diagrams)
       - name: Install Graphviz
