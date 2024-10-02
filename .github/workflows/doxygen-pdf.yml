@@ -1,0 +1,46 @@
+name: Generate Doxygen PDF
+
+# Run this workflow on push or pull request events
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Install Doxygen
+      - name: Install Doxygen
+        run: sudo apt-get install -y doxygen
+
+      # Install LaTeX (TeX Live for Linux)
+      - name: Install LaTeX
+        run: sudo apt-get install -y texlive-full
+
+      # Install Graphviz (for diagrams)
+      - name: Install Graphviz
+        run: sudo apt-get install -y graphviz
+
+      # Run Doxygen to generate LaTeX files
+      - name: Run Doxygen
+        run: doxygen Doxyfile
+
+      # Generate PDF from LaTeX output
+      - name: Generate PDF from LaTeX
+        working-directory: ./doc/latex
+        run: |
+          pdflatex refman.tex
+          pdflatex refman.tex
+          bibtex refman
+          pdflatex refman.tex
+          pdflatex refman.tex
+
+      # Upload the generated PDF as an artifact
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Doxygen-PDF
+          path: ./doc/latex/refman.pdf
