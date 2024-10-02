@@ -1,46 +1,40 @@
-name: Generate Doxygen PDF
-
-# Run this workflow on push or pull request events
+name: Deploy Doxygen PDF
 on: [push, pull_request]
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # Step 1: Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      # Install Doxygen
+      # Step 2: Install Doxygen
       - name: Install Doxygen
         run: sudo apt-get install -y doxygen
 
-      # Install LaTeX (TeX Live for Linux)
-      - name: Install LaTeX
-        run: sudo apt-get install -y texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-latex-recommended texlive-science
-
-      # Install Graphviz (for diagrams)
+      # Step 3: Install Graphviz for diagrams (if needed by Doxygen)
       - name: Install Graphviz
         run: sudo apt-get install -y graphviz
 
-      # Run Doxygen to generate LaTeX files
+      # Step 4: Generate Doxygen documentation (this assumes you have a Doxyfile in your repo)
       - name: Run Doxygen
         run: doxygen Doxyfile
 
-      # Generate PDF from LaTeX output
-      - name: Generate PDF from LaTeX
-        working-directory: ./doc/latex
-        run: |
-          pdflatex refman.tex
-          pdflatex refman.tex
-          bibtex refman
-          pdflatex refman.tex
-          pdflatex refman.tex
+      # Step 5: Use the LaTeX container to generate the PDF from the LaTeX files produced by Doxygen
+      - name: Generate PDF using LaTeX Action
+        uses: xu-cheng/latex-action@v2
+        with:
+          root_file: doc/latex/refman.tex
 
-      # Upload the generated PDF as an artifact
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v3
+      # Step 6: Copy the generated PDF to a folder for deployment
+      - name: Copy PDF to output folder
+        run: |
+          mkdir out
+          cp ./doc/latex/refman.pdf ./out/refman.pdf
+
+      # Step 7: Upload the PDF as an artifact for download from the Actions tab
+      - uses: actions/upload-artifact@v2
         with:
           name: Doxygen-PDF
-          path: ./doc/latex/refman.pdf
+          path: out/refman.pdf
