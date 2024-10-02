@@ -25,7 +25,8 @@ jobs:
       - name: Generate PDF using LaTeX Action
         uses: xu-cheng/latex-action@v2
         with:
-          root_file: docs/latex/refman.tex
+          working_directory: docs/latex/
+          root_file: refman.tex
 
       # Step 6: Copy the generated PDF to a folder for deployment
       - name: Copy PDF to output folder
