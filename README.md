@@ -226,11 +226,7 @@ GCGCCCGAACAGGGACTTGAAAGCGAAAGTGAGACCAGAGAAGATCTCTCGACGCAGGACTCGGCTTGCTGAAGTGCACT
 ```
 ### Documentation
 
-A basic JSDoc documentation of cawlign can be found at `docs/` and can be viewed by cloning the repository and opening `docs/index.html` in a browser (or running a basic web server in the `docs/` directory, e.g. `python -m http.server`).
-
-A PDF version of the documentation can be found at `docs/cawlign-doxygen-docs.pdf`.
-
 Doxygen generated documentation can be found [here](https://veg.github.io/cawlign/html/index.html)
 
-This documentation is generated automatically using JSDoc and Doxygen and ran automatically as part of the CI/CD pipeline (see `.github/workflows/jsdoc-doxygen.yml`). 
+This documentation is generated automatically as part of the CI/CD pipeline (see `.github/workflows/doxygen.yml`). 
 

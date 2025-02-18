@@ -23,23 +23,6 @@ jobs:
         with:
           node-version: 21
 
-      - name: Install JSDoc
-        run: npm install -g jsdoc
-
-      - name: Generate JSDoc
-        run: jsdoc -c jsdoc.json
-
-      - name: Copy JSDoc to output folder
-        run: |
-          mkdir jsdoc
-          cp -r ./docs/ jsdoc/
-
-      - name: Upload JSDoc
-        uses: actions/upload-artifact@v4
-        with:
-          name: JSDoc
-          path: jsdoc/
-
       - name: Install Doxygen
         run: sudo apt-get install -y doxygen
 
@@ -79,6 +62,6 @@ jobs:
             echo "No changes to commit"
           else
             # Changes detected
-            git commit -m "Update JSDoc and Doxygen PDF"
+            git commit -m "Update Doxygen docs"
             git push
           fi
