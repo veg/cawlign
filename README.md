@@ -230,5 +230,7 @@ A basic JSDoc documentation of cawlign can be found at `docs/` and can be viewed
 
 A PDF version of the documentation can be found at `docs/cawlign-doxygen-docs.pdf`.
 
+Doxygen generated documentation can be found [here](https://veg.github.io/cawlign/html/index.html)
+
 This documentation is generated automatically using JSDoc and Doxygen and ran automatically as part of the CI/CD pipeline (see `.github/workflows/jsdoc-doxygen.yml`). 
 

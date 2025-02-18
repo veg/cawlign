@@ -1,7 +1,7 @@
 name: Deploy Doxygen PDF and Update Docs
 on:
   push:
-    branches: ["master", "release-candidate"]
+    branches: ["main"]
 
   workflow_dispatch:
 
