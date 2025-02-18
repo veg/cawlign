@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['vector_0',['Vector',['../class_vector.html',1,'']]],
-  ['vectorfp_1',['VectorFP',['../class_vector_f_p.html',1,'']]]
+  ['vector_0',['Vector',['../classVector.html',1,'']]],
+  ['vectorfp_1',['VectorFP',['../classVectorFP.html',1,'']]]
 ];
