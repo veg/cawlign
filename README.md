@@ -226,7 +226,7 @@ GCGCCCGAACAGGGACTTGAAAGCGAAAGTGAGACCAGAGAAGATCTCTCGACGCAGGACTCGGCTTGCTGAAGTGCACT
 ```
 ### Documentation
 
-Doxygen generated documentation can be found at [https://veg.github.io/cawlign/html/index.htm](https://veg.github.io/cawlign/html/index.html). A PDF version is available at [https://veg.github.io/cawlign/cawlign-doxygen-docs.pdf](https://veg.github.io/cawlign/cawlign-doxygen-docs.pdf).
+Doxygen generated documentation can be found at [https://veg.github.io/cawlign/html/index.html](https://veg.github.io/cawlign/html/index.html). A PDF version is available at [https://veg.github.io/cawlign/cawlign-doxygen-docs.pdf](https://veg.github.io/cawlign/cawlign-doxygen-docs.pdf).
 
 This documentation is generated automatically as part of the CI/CD pipeline (see `.github/workflows/doxygen.yml`). 
 
