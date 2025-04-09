@@ -14,6 +14,11 @@ A standalone C++ port of `bealign`, a part of the `BioExt` (https://github.com/v
 
 #### Installation.
 
+`conda install -c bioconda cawlign`
+
+
+#### Building from source
+
 Requires `CMake`.
 
 ```
