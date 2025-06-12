@@ -151,7 +151,11 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
         ERROR_NO_USAGE ("Incomplete amino-acid alphabet");
     }
     
-    int allowed_aa [255] { [0 ... 254] = -1};
+    int allowed_aa [255];
+    
+    for (int i = 0; i < 255; i++) {
+        allowed_aa [i] = -1;
+    }
     
     for (int i = 0; i < aaD; i++) {
         allowed_aa[toupper(_alph.at(i))] = i;
