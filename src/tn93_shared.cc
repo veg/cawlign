@@ -481,7 +481,7 @@ int readFASTA (FILE* F, char& automatonState,  StringBuffer &names,
   
       while (1) {
         int currentC = getc_unlocked (F);
-          //cout << "State: " << int(automatonState) << "/'" << char(currentC) << "'" << endl;
+        //cout << "State: " << int(automatonState) << "/'" << char(currentC) << "'" << endl;
         if (feof_unlocked (F))
           break;
           
@@ -577,7 +577,7 @@ int readFASTA (FILE* F, char& automatonState,  StringBuffer &names,
             currentC = toupper (currentC);
             if (validFlags [currentC] >= 0) {
               if (include_me)
-                //cout << "Append " << currentC << endl;
+                //cout << "Append " << (char)currentC << ":" << currentC << endl;
                 sequences.appendChar (currentC);
             }
             else {
@@ -588,7 +588,7 @@ int readFASTA (FILE* F, char& automatonState,  StringBuffer &names,
                     if (firstSequenceLength == 0) {
                       firstSequenceLength = sequences.length()-1;
                     }
-                      //cerr << endl << "Returning a sequence" << endl;
+                    //cerr << endl << "Returning a sequence" << firstSequenceLength << endl;
                     automatonState = 0;
                     sequences.appendChar ('\0');
                     ungetc (currentC, F);

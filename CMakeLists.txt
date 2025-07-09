@@ -30,8 +30,8 @@ add_executable(
     src/scoring.cpp
 )
 
-target_compile_options (cawlign PRIVATE -O3 -std=c++14  -funroll-loops )
-target_link_options (cawlign PRIVATE -O3 -std=c++14 -funroll-loops)
+target_compile_options (cawlign PRIVATE -fsigned-char -O3 -std=c++14  -funroll-loops )
+target_link_options (cawlign PRIVATE -O3 -std=c++14 -fsigned-char -funroll-loops)
 
 
 add_executable(
