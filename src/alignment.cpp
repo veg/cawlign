@@ -40,6 +40,9 @@
 #include <cctype>
 #include <cstring>
 
+#if defined(__ARM_NEON__)
+#include <arm_neon.h>
+#endif
 
 #include <math.h>
 #include <stdio.h>
@@ -137,6 +140,8 @@
 
 #define HY_LOCAL_ALIGN_SHORTCUT 23
 
+#define HY_MAXIMUM_RESOLUTIONS  8
+
 //____________________________________________________________________________________
 
 
@@ -191,6 +196,8 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
                           , cawlign_fp const *  codon3x2
                           , cawlign_fp const*  codon3x1
                           , const    bool  do_local
+                          , cawlign_fp& score
+                          , long const * resolutions
                           )
 {
     /**
@@ -222,6 +229,87 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
          partial_codons[ 10 ];
     // we need to multiply by 3 to get the NUC position
     
+    auto construct_codon_code = [&] (long c1, long c2, long c3) -> long {
+        if (c1 >= 0 && c2 >= 0 && c3 >= 0) {
+            return ((c1 * char_count + c2) * char_count + c3);
+        }
+        return -1;
+    };
+    
+    auto construct_resolutions = [&] (long c1, long c2, long c3, long * store) -> long {
+        if (resolutions) {
+            
+            long res1[4] = {0},
+            res2[4] = {0},
+            res3[4] = {0};
+            
+            long res_count [3] = {0,0,0};
+            
+            if (c1 >= 0) {
+                res1[c1] = 1;
+                res_count [0] = 1;
+            } else {
+                if (c1 == -1) return 0;
+                c1 = -c1 - 2;
+                res1[0] = resolutions[c1*4];
+                res1[1] = resolutions[c1*4+1];
+                res1[2] = resolutions[c1*4+2];
+                res1[3] = resolutions[c1*4+3];
+                res_count [0] = res1[0] + res1[1] + res1[2] + res1[3];
+            }
+            
+            if (c2 >= 0) {
+                res2[c2] = 1;
+                res_count [1] = 1;
+            } else {
+                if (c2 == -1) return 0;
+                c2 = -c2 - 2;
+                res2[0] = resolutions[c2*4];
+                res2[1] = resolutions[c2*4+1];
+                res2[2] = resolutions[c2*4+2];
+                res2[3] = resolutions[c2*4+3];
+                res_count [1] = res2[0] + res2[1] + res2[2] + res2[3];
+            }
+            
+            if (c3 >= 0) {
+                res3[c3] = 1;
+                res_count [2] = 1;
+            } else {
+                if (c3 == -1) return 0;
+                c3 = -c3 - 2;
+                res3[0] = resolutions[c3*4];
+                res3[1] = resolutions[c3*4+1];
+                res3[2] = resolutions[c3*4+2];
+                res3[3] = resolutions[c3*4+3];
+                res_count [2] = res3[0] + res3[1] + res3[2] + res3[3];
+            }
+            
+            long total_res = res_count[0] * res_count[1] * res_count[2];
+            
+            if (total_res > HY_MAXIMUM_RESOLUTIONS) return 0;
+            
+            long res_index = 0;
+            
+            for (long i = 0; i < 4; i++) {
+                if (res1[i]) {
+                    for (long j = 0; j < 4; j++) {
+                        if (res2[j]) {
+                            for (long k = 0; k < 4; k++) {
+                                if (res3[k]) {
+                                    store [res_index++] = (i*char_count + j)*char_count + k;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return res_index;
+            
+        }
+        return 0;
+    };
+
     // 3x5 codon specifications (inverted indices)
     static long const codon_spec_3x5[ 10 ][ 3 ] = {
         { 5, 4, 3 }, // 11100
@@ -265,13 +353,13 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
                 deletion_matrix[ prev ] - ( r > 1 ? extend_deletion : open_deletion )
             );
             deletion_matrix[ curr ] = choices[ HY_111_000 ];
+            
+            //printf ("%ld/%ld %g %g \n", r, q, deletion_matrix[ prev ] , deletion_matrix[ curr ]);
         } else {
             choices[ HY_111_000 ] = score_matrix[ prev ] - open_deletion;
         }
 
-        r_codon = ( reference[ rpos - 3 ]   * char_count
-                  + reference[ rpos - 2 ] ) * char_count
-                  + reference[ rpos - 1 ] ;
+        r_codon = construct_codon_code ( reference[ rpos - 3 ] ,reference[ rpos - 2 ], reference[ rpos - 1 ]) ;
 
         if ( r_codon < 0 ) {
             // anything other than a fully resolved codon gets mapped to the "generic unresolved" character
@@ -294,20 +382,33 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
             choices[ HY_000_111 ] = score_matrix[ curr - 3 ] - open_insertion;
         }
 
-        q_codon = ( query[ q - 3 ]   * char_count
-                  + query[ q - 2 ] ) * char_count
-                  + query[ q - 1 ] ;
-
-        if ( q_codon < 0 ) {
-           // anything other than a fully resolved codon gets mapped to the "generic unresolved" character
-           q_codon = cost_stride - 1;
-        }
+        q_codon = construct_codon_code ( query[ q - 3 ], query[ q - 2 ], query[ q - 1 ]);
     }
 
     // if q_codon and r_codon both exist, set the score equal to match
-    if ( q_codon >= 0 && r_codon >= 0 ) {
-        const cawlign_fp move_cost = cost_matrix[ r_codon * cost_stride + q_codon ];
-        choices[ HY_111_111 ] = score_matrix[ prev - 3 ] + move_cost;
+    if ( r_codon >= 0 && q >= 3) {
+        if (q_codon < 0) {
+            // check the resolutions if they are available
+            long resolutions [HY_MAXIMUM_RESOLUTIONS],
+            res_count = construct_resolutions (query[ q - 3 ], query[ q - 2 ], query[ q - 1 ], resolutions);
+            if (res_count) {
+                cawlign_fp score = 0.;
+                for (long i = 0; i < res_count; i++) {
+                    score += cost_matrix[ r_codon * cost_stride + resolutions[i]];
+                }
+                score /= res_count;
+                choices[ HY_111_111 ] = score_matrix[ prev - 3 ] + score;
+            } else {
+                choices[ HY_111_111 ] = score_matrix[ prev - 3 ] + cost_matrix[ r_codon * cost_stride + cost_stride - 1 ];
+            }
+            q_codon = cost_stride - 1;
+        } else {
+            
+            if (q_codon >= 0) {
+                const cawlign_fp move_cost = cost_matrix[ r_codon * cost_stride + q_codon ];
+                choices[ HY_111_111 ] = score_matrix[ prev - 3 ] + move_cost;
+            }
+        }
         //if (do_local && choices [HY_LOCAL_ALIGN_SHORTCUT] < move_cost) {
         //    local_shortcut_came_from_this_move = HY_111_111;
         //    choices [HY_LOCAL_ALIGN_SHORTCUT]  = move_cost;
@@ -320,6 +421,63 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
 
     // miscall matches, starting with 3x5, then 3x4, then 3x2, finally 3x1
     if ( r_codon >= 0 ) {
+#if defined(__ARM_NEON2__)
+        // 3x5 partial codons
+        if ( q >= 5 ) {
+            // fill in the partial codons table
+            // use a 10x1 array to allow for load hoisting,
+            // we don't want to be bouncing cachelines in this critical inner loop
+            for (long i = 0; i < HY_3X5_COUNT; ++i ) {
+                partial_codons[ i ] = ( query[ q - codon_spec_3x5[ i ][ 0 ] ]   * char_count
+                                      + query[ q - codon_spec_3x5[ i ][ 1 ] ] ) * char_count
+                                      + query[ q - codon_spec_3x5[ i ][ 2 ] ] ;
+            }
+            // go over each choice, fill it in
+            for (long i = 0; i < HY_3X5_COUNT; i+=4 ) {
+                 cawlign_fp p[4];
+                 long       c[4];
+                 
+                 for (long k=0; k<4; k++) {
+                    if (i+k < HY_3X5_COUNT) {
+                        c[k] = HY_3X5_START + i + k;
+                        if ( ( q == 5              && c[k] == HY_00111_11111 )
+                          || ( q == score_cols - 1 && c[k] == HY_11100_11111 ) )
+                            p[k] = 0.;
+                        // if we have a single ragged edge, penalize by a single miscall
+                        // we don't have to worry about specifying each case here,
+                        // as the 00111_11111 case takes preference above,
+                        // so we don't have to explicitly avoid it
+                        else if ( q == 5 && c[k] >= HY_01110_11111 )
+                            p[k] = miscall_cost;
+                        // if we have a single ragged edge, penalize by a single miscall
+                        // unfortunately these cases are spread out,
+                        // so we have to enumerate them explicitly here
+                        else if ( q == score_cols - 1
+                               && ( c[k] == HY_11010_11111
+                                 || c[k] == HY_10110_11111
+                                 || c[k] == HY_01110_11111 ) )
+                            p[k] = miscall_cost;
+                        // if we don't fit into any of these special cases,
+                        // the miscall penalty is cawlign_fp (as we're matching 3 to 5)
+                        else
+                            p[k] = 2. * miscall_cost;
+                    }
+                 }
+                
+                float32x4_t penalties = vld1q_f32(p);
+                float32x4_t move_costs = vld1q_f32(codon3x5 + r_codon * offset3x5 + HY_3X5_COUNT * partial_codons[ i ] + i);
+                float32x4_t score_matrix_vector = vdupq_n_f32 (score_matrix[ prev - 5 ]);
+                float32x4_t choice_scores = vsubq_f32(vaddq_f32(score_matrix_vector, move_costs), penalties);
+                
+                for (long k=0; k<4; k++) {
+                    if (i+k < HY_3X5_COUNT) {
+                        choices [c[k]] = choice_scores[k];
+                    }
+                }
+
+            }
+        }
+#else
         // 3x5 partial codons
         if ( q >= 5 ) {
             // fill in the partial codons table
@@ -368,7 +526,48 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
                 }
             }
         }
+#endif
 
+#if defined(__ARM_NEON2__)
+        // 3x4 partial codons
+        if ( q >= 4 ) {
+            // fill in partial codons table
+            for (long i = 0; i < HY_3X4_COUNT; ++i ) {
+                partial_codons[ i ] = ( query[ q - codon_spec_3x4[ i ][ 0 ] ]   * char_count
+                                      + query[ q - codon_spec_3x4[ i ][ 1 ] ] ) * char_count
+                                      + query[ q - codon_spec_3x4[ i ][ 2 ] ] ;
+            }
+            // fill in choices
+            cawlign_fp p[4];
+            long       c[4];
+
+            for (long i = 0; i < HY_3X4_COUNT; ++i ) {
+                if ( partial_codons[ i ] >= 0 ) {
+                    c[i] = HY_3X4_START + i;
+                    // if we have a ragged edge,
+                    // penalize it not at all
+                    if ( ( q == 4              && c[i] == HY_0111_1111 )
+                      || ( q == score_cols - 1 && c[i] == HY_1110_1111 ) )
+                        p[i] = 0.;
+                    // otherwise it's just a single miscall penalty
+                    else
+                        p[i] = miscall_cost;
+                }
+            }
+            
+            float32x4_t penalties = vld1q_f32(p);
+            float32x4_t move_costs = vld1q_f32(codon3x4 + r_codon * offset3x4 + HY_3X4_COUNT * partial_codons[ 0 ] );
+            float32x4_t score_matrix_vector = vdupq_n_f32 (score_matrix[ prev - 4 ]);
+            float32x4_t choice_scores = vsubq_f32(vaddq_f32(score_matrix_vector, move_costs), penalties);
+            
+            for (long k=0; k<4; k++) {
+                if (partial_codons[k] >= 0) {
+                    choices [c[k]] = choice_scores[k];
+                }
+            }
+
+        }
+#else
         // 3x4 partial codons
         if ( q >= 4 ) {
             // fill in partial codons table
@@ -400,7 +599,41 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
                 }
             }
         }
+#endif
+#if defined(__ARM_NEON2__)
+        // 3x2
+        if ( q >= 2 ) {
+            // only a single partial codon
+            partial_codons[ 0 ] = query[ q - 2 ] * char_count
+                                + query[ q - 1 ] ;
+            // fill in choices
+            if ( partial_codons[ 0 ] >= 0 ) {
+                cawlign_fp p[4];
+                long       c[4];
 
+                for (long i = 0; i < HY_3X2_COUNT; ++i ) {
+                    c[i] = HY_3X2_START + i;
+                    // if we have a ragged edge at the beginning or end,
+                    // respectively, don't penalize it
+                    if ( ( q == 2              && c[i] == HY_111_011 )
+                      || ( q == score_cols - 1 && c[i] == HY_111_110 ) )
+                        p[i] = 0.;
+                    // otherwise it's just a single miscall penalty
+                    else
+                        p[i] = miscall_cost;
+                }
+                
+                float32x4_t penalties = vld1q_f32(p);
+                float32x4_t move_costs = vld1q_f32(codon3x2 + r_codon * offset3x2 + HY_3X2_COUNT * partial_codons[ 0 ]);
+                float32x4_t score_matrix_vector = vdupq_n_f32 (score_matrix[ prev - 2 ]);
+                float32x4_t choice_scores = vsubq_f32(vaddq_f32(score_matrix_vector, move_costs), penalties);
+
+                for (long k=0; k<HY_3X2_COUNT; k++) {
+                    choices [c[k]] = choice_scores[k];
+                }
+            }
+        }
+#else
         // 3x2
         if ( q >= 2 ) {
             // only a single partial codon
@@ -430,7 +663,46 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
                 }
             }
         }
+#endif
+#if defined(__ARM_NEON2__)
+        // 3x1
+        if ( q >= 1 ) {
+            // only a single partial codon
+            partial_codons[ 0 ] = query[ q - 1 ];
+            // fill in choices
+            if ( partial_codons[ 0 ] >= 0 ) {
+                cawlign_fp p[4];
+                long       c[4];
 
+                for (long i = 0; i < HY_3X1_COUNT; ++i ) {
+                    c[i] = HY_3X1_START + i;
+                    // if we have a cawlign_fp ragged edge,
+                    // don't enforce a miscall penalty
+                    if ( ( q == 1              && c[i] == HY_111_001 )
+                      || ( q == score_cols - 1 && c[i] == HY_111_100 ) )
+                        p[i] = 0.;
+                    // if we have a single ragged edge,
+                    // enforce only a single miscall penalty
+                    else if ( ( q == 1              && c[i] == HY_111_010 )
+                           || ( q == score_cols - 1 && c[i] == HY_111_010 ) )
+                        p[i] = miscall_cost;
+                    // otherwise we need a cawlign_fp miscall penalty,
+                    // for the two positions we're inserting
+                    else
+                        p[i] = 2. * miscall_cost;
+                }
+                
+                float32x4_t penalties = vld1q_f32(p);
+                float32x4_t move_costs = vld1q_f32(codon3x1 + r_codon * offset3x1 + HY_3X1_COUNT * partial_codons[ 0 ]);
+                float32x4_t score_matrix_vector = vdupq_n_f32 (score_matrix[ prev - 1 ]);
+                float32x4_t choice_scores = vsubq_f32(vaddq_f32(score_matrix_vector, move_costs), penalties);
+
+                for (long k=0; k<HY_3X1_COUNT; k++) {
+                    choices [c[k]] = choice_scores[k];
+                }
+            }
+        }
+#else
         // 3x1
         if ( q >= 1 ) {
             // only a single partial codon
@@ -464,6 +736,7 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
                 }
             }
         }
+#endif
     }
 
     // find the best possible choice
@@ -492,6 +765,7 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
     //if (do_local && best_choice == HY_LOCAL_ALIGN_SHORTCUT) {
     //    return -local_shortcut_came_from_this_move - 1;
     //}
+    score = max_score;
     return best_choice;
 }
 
@@ -563,6 +837,7 @@ inline void BacktrackAlignCodon( signed char * const edit_ops
                 2. there's also an opportinity to use bitmasks
             
     */
+    //printf ("%ld (%ld/%ld) %ld\n", edit_ptr, r, q, code);
     
     switch ( code ) {
             // match
@@ -793,6 +1068,7 @@ inline void MatchScore( char const * r_str
  * @param score_matrix_cache if provided, use this to store the scoring matrix (assumed to have sufficient size)
  * @param insertion_matrix_cache if provided, use this to store the insertion (affine gaps) score matrix (assumed to have sufficient size)
  * @param deletion_matrix_cache if provided, use this to store the  deletion (affine gaps) score scoring matrix (assumed to have sufficient size)
+ * @param resolution_map if provided, lists ambiguity resolutions for codon-aware alignments
  * @return the alignment score
 
 */
@@ -824,6 +1100,7 @@ cawlign_fp AlignStrings( char const * r_str
                    , cawlign_fp* score_matrix_cache
                    , cawlign_fp* insertion_matrix_cache
                    , cawlign_fp* deletion_matrix_cache
+                   , const long* resolution_map
                    )
 {
     const unsigned long r_len = _r_len >= 0 ? _r_len : strlen( r_str ),
@@ -923,8 +1200,8 @@ cawlign_fp AlignStrings( char const * r_str
             
 
             //if ( do_affine ) {
-                //memset (insertion_matrix, 0, sizeof (cawlign_fp) * score_rows * score_cols);
-                //memset (deletion_matrix , 0, sizeof (cawlign_fp) * score_rows * score_cols);
+            //    memset (insertion_matrix, 0, sizeof (cawlign_fp) * score_rows * score_cols);
+            //    memset (deletion_matrix , 0, sizeof (cawlign_fp) * score_rows * score_cols);
             //}
 
             score_matrix [ 0 ] = 0.;
@@ -1011,14 +1288,17 @@ cawlign_fp AlignStrings( char const * r_str
                             
                             insertion_matrix[ i ] = is;
                             insertion_matrix[ i + 1 ] = 0.;//is;
-                            insertion_matrix[ i + 2] = 0.;// is;
+                            insertion_matrix[ i + 2 ] = 0.;// is;
 
                             deletion_matrix [ i ] = 0.;
+                            deletion_matrix [ i + 1 ] = 0.;
+                            deletion_matrix [ i + 2 ] = 0.;
+                            
                             score_matrix [ i ] = 0.;
                         }
                         
-                        for (long i = score_cols + 1; i < score_rows * score_cols; i += score_cols ) {
-                        }
+                        //for (long i = score_cols + 1; i < score_rows * score_cols; i += score_cols ) {
+                        //}
                         
 
                     } else {
@@ -1054,6 +1334,7 @@ cawlign_fp AlignStrings( char const * r_str
 
             if ( do_codon ) {
                 /** populate the dynamic programming matrix here */
+                cawlign_fp score;
                 for (long i = 1; i < score_rows; ++i )
                     for (long j = 1; j < score_cols; ++j )
                         CodonAlignStringsStep( score_matrix
@@ -1077,6 +1358,8 @@ cawlign_fp AlignStrings( char const * r_str
                                              , codon3x2
                                              , codon3x1
                                              , do_true_local
+                                             , score
+                                             , resolution_map
                                              );
                 // not doing codon alignment
             } else {
@@ -1209,8 +1492,10 @@ cawlign_fp AlignStrings( char const * r_str
             if ( do_codon ) {
                 // if either index hits 0, we're done
                 // or if both indices fall below 3, we're done
+
                 while ( index_R && index_Q && ( index_R >= 3 || index_Q >= 3 ) && !took_local_shortcut ) {
                     // perform a step
+                    cawlign_fp local_score;
                     long code = CodonAlignStringsStep( score_matrix
                                                            , r_enc
                                                            , q_enc
@@ -1233,19 +1518,22 @@ cawlign_fp AlignStrings( char const * r_str
                                                            , codon3x2
                                                            , codon3x1
                                                            , do_true_local
+                                                           , local_score
+                                                           , resolution_map
                                                            );
 
+                    
                     // alter edit_ops and decrement i and j
                     // according to the step k we took
                     if (do_true_local && code < 0) {
                          code = -code - 1;
                          took_local_shortcut = true;
                     }
-
+                    
                     
                     BacktrackAlignCodon( edit_ops, edit_ptr, index_R, index_Q, code );
                     
-
+                    
                     // if anything drops below 0, something bad happened
                     if ( index_R < 0 || index_Q < 0 ) {
                         //delete [] edit_ops;
@@ -1442,22 +1730,6 @@ cawlign_fp AlignStrings( char const * r_str
                 q_res[ k ] = '\0';
             }
 
-#ifdef ALIGN_DEBUG
-            _String alignDebug( "alignScoreMatrix" );
-            _Variable * ad = CheckReceptacle( &alignDebug, empty, false );
-            ad->SetValue( score_matrix, true );
-
-            // grab the affine matrices too,
-            // if that's what we're doing
-            if ( do_affine ) {
-                _String alignDebug( "alignScoreMatrixG1" );
-                _Variable * ad = CheckReceptacle( &alignDebug, empty, false );
-                ad->SetValue( insertion_matrix, true );
-                alignDebug = ( "alignScoreMatrixG2" );
-                ad = CheckReceptacle( &alignDebug, empty, false );
-                ad->SetValue( deletion_matrix, true );
-            }
-#endif
             //delete [] edit_ops;
             if (score_matrix != score_matrix_cache) {
                 delete [] score_matrix;

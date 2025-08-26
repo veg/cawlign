@@ -71,6 +71,8 @@ cawlign_fp AlignStrings( char const * r_str
                    , cawlign_fp* score_matrix_cache = nullptr
                    , cawlign_fp* insertion_matrix_cache = nullptr
                    , cawlign_fp* deletion_matrix_cache = nullptr
+                   , const long* resolution_map = nullptr
+
                    );
 
 cawlign_fp LinearSpaceAlign(    const char * s1           // first string

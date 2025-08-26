@@ -140,7 +140,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
     alphabet.appendBuffer(kNucleotideAlphabet);
     
     D = 4;
-    _init_alphabet ();
+    _init_alphabet (-1);
     D = 64;
     
     gap_char = '-';
@@ -207,7 +207,48 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
         translation_table.appendValue(translation_token);
     }
     
+    vector<string> _resolutions = settings->aConfigVec<string>("CODE", "resolutions");
     
+    bool stash_char = true;
+    
+    long resolution_count = 0;
+    
+    for (auto s: _resolutions) {
+        switch (s.length()) {
+            case 0:
+                stash_char = true;
+                break;
+            case 1: {
+                unsigned char cc = s[0];
+                //cout << cc << endl;
+                if (!stash_char) {
+                    long resolution = char_map [cc];
+                    if (resolution < 0 || resolution > 3) {
+                        ERROR_NO_USAGE ("Ambiguity resolution must be a valid character (ACGT)");
+                    } else {
+                        resolutions.storeValue(1, (resolution_count-1)*4 + resolution);
+                    }
+                    break;
+                } else {
+                    //cout << char_map[cc] << endl;
+                    if (char_map[cc] != -1) {
+                        ERROR_NO_USAGE ("Can't define ambiguity resolutions twice");
+                    }
+                    char_map[cc] = -2-(resolution_count++);
+                    resolutions.appendValue(0);
+                    resolutions.appendValue(0);
+                    resolutions.appendValue(0);
+                    resolutions.appendValue(0);
+                    stash_char = false;
+                }
+                break;
+            }
+            default: {
+                ERROR_NO_USAGE ("All ambiguiity resolutions must be single characters");
+            }
+        }
+    }
+
     synonymous_penalty = 1.;
     /* first, define a 65x65 scoring matrix for all pairs of codons + sink (unresolved) state
      
@@ -366,9 +407,9 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
     extend_gap_reference  = settings->aConfig<cawlign_fp>("PARAMETERS", "extend_deletion");
     extend_gap_query      = settings->aConfig<cawlign_fp>("PARAMETERS", "extend_insertion");
     frameshift_cost       = settings->aConfig<cawlign_fp>("PARAMETERS", "frameshift_cost");
-    
+        
     cawlign_fp indel_cost = MAX(max_score, -min_score),
-               ext_cost = 3.*(max_score-min_score) / 40.;
+               ext_cost = 3.*(max_score-min_score) / 60.;
     
     if (frameshift_cost < 0.) {
         frameshift_cost = 3.*indel_cost;
@@ -387,4 +428,10 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
     if (extend_gap_reference< 0.) {
         extend_gap_reference = ext_cost;
     }
+    
+    //cout << "FRAMESHIFT " << frameshift_cost << endl;
+    //cout << "open_gap_reference " << open_gap_reference << endl;
+    //cout << "open_gap_query " << open_gap_query << endl;
+    //+cout << "extend_gap_query " << extend_gap_query << endl;
+    //cout << "extend_gap_reference " << extend_gap_reference << endl;
 }

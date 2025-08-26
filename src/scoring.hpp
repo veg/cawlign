@@ -67,8 +67,12 @@ class CawalignCodonScores : public CawalignSimpleScores {
         // compute how many nucleotides are different between the two codons encoded as 0-63 integers
         static int nucleotide_diff (long, long);
         
-        Vector                translation_table;
+        Vector                translation_table,
         // codon (0-63 index) to single letter amino-acid code translation table
+                              resolutions;
+        // an linear array of resolutions for ambiguous nucleotides
+        // if char_map[i] < -1, then indexing into this array using (-char_map[i]-2)*4 index will
+        // return a four integer map, with 0 indicating that the corresponding character is not in the resolution, and 1 - that it is
     
         // partial score tables
         VectorFP          s3x1,

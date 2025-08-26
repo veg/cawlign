@@ -1,4 +1,4 @@
-'''#ifndef 	__TN93SHARED__
+#ifndef 	__TN93SHARED__
 #define 	__TN93SHARED__
 
 #include <iostream>
@@ -278,4 +278,3 @@ extern const  double  resolutionsCount [];
 extern char validFlags[];
 
 #endif
-''

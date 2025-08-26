@@ -1,4 +1,4 @@
-'''#ifndef __STRINGBUFFER__
+#ifndef __STRINGBUFFER__
 #define __STRINGBUFFER__
 
 #include "alignment.h"
@@ -272,8 +272,10 @@ public:
    * @return unsigned long The length of the vector.
    */
   unsigned long length(void) const { return vLength; }
+    
+  const long * rvalues (void) const {return vData;}
 
   static long vDefaultLength, vDefaultBoost;
 };
 
-#endif''
+#endif

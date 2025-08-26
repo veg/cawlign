@@ -445,7 +445,8 @@ int main (int argc, const char * argv[]) {
                                      args.out_format != refmap,
                                      scoreCache.rvalues(),
                                      insertCache.rvalues(),
-                                     deleteCache.rvalues()
+                                     deleteCache.rvalues(),
+                                     codonScoring->resolutions.rvalues ()
                                      );
                 
                 if (args.reverse_complement != none) {
@@ -487,7 +488,8 @@ int main (int argc, const char * argv[]) {
                                            args.out_format != refmap,
                                            scoreCache.rvalues(),
                                            insertCache.rvalues(),
-                                           deleteCache.rvalues()
+                                           deleteCache.rvalues(),
+                                           codonScoring->resolutions.rvalues ()
                                            );
                     
                     handle_rc (forward_score, rc_score, alignedRefSeq, alignedQrySeq, alignedRefSeqRC, alignedQrySeqRC);

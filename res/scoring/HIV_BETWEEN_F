@@ -14,6 +14,13 @@ aminoacids = ARNDCQEGHILKMFPSTWYVBZX*
 
 translations = K,N,K,N,T,T,T,T,R,S,R,S,I,I,M,I,Q,H,Q,H,P,P,P,P,R,R,R,R,L,L,L,L,E,D,E,D,A,A,A,A,G,G,G,G,V,V,V,V,X,Y,X,Y,S,S,S,S,X,C,W,C,L,F,L,F
 
+; resolutions of ambiguous characters to consider
+; the are of the form
+; A,X1,X2,,
+
+resolutions = R,A,G,,Y,C,T,,S,C,G,,W,A,T,,M,A,C,,K,G,T,,H,A,C,T,,B,C,G,T,,V,A,C,G,,D,A,G,T,,N,A,C,G,T
+
+
 [MATRIX]
 ; scoring matrix
 ; if the alphabet has "D" characters this must be a (D+1) x (D+1) vector
