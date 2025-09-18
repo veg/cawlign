@@ -1,4 +1,3 @@
-
 /* argument parsing ------------------------------------------------------------------------------------------------- */
 
 #include <cstdarg>
@@ -45,7 +44,8 @@ const char help_msg[] =
 "  -o OUTPUT                direct the output to a file named OUTPUT (default=stdout)\n"
 "  -r REFERENCE             read the reference sequence from this file (default=" TO_STR (DEFAULT_REFERENCE)")\n"
 "                           first checks to see if the filepath exists, if not looks inside the res/references directory\n"
-"                           relative to the install path (/usr/local/share/cawlign by default)\n"
+"                           relative to the install path (/usr/local/share/cawlign by default).\n"
+"                           If not a file, it is treated as a literal sequence.\n"
 "  -s SCORE                 read the scoring matrices and options from this file (default=" TO_STR (DEFAULT_SCORING)")\n"
 "                           first checks to see if the filepath exists, if not looks inside the res/scoring directory\n"
 "                           relative to the install path (/usr/local/share/cawlign by default)\n"
@@ -64,6 +64,8 @@ const char help_msg[] =
 "                           local  : partial string local (smith-waterman type) alignment which maximizes the alignment score\n"
 "  -f FORMAT                controls the format of the output (default=" TO_STR( DEFAULT_OUTPUT_FORMAT ) ")\n"
 "                           refmap   : aligns query sequences to the reference and does NOT retain instertions relative to the reference;\n"
+"                           refalign : aligns query sequences to the reference and DOES retain instertions relative to the reference;\n"
+"                                      no MSA is generated, but rather individual alignments to reference with likely different lengths are reported ;\n"
 "                           pairwise : aligns query sequences to the reference and DOES retain instertions relative to the reference;\n"
 "                                      no MSA is generated, but rather pair-wise alignments are all reported (2x the number of sequences);\n"
 "  -S SPACE                 which version of the algorithm to use (an integer >0, default=" TO_STR( DEFAULT_SPACE ) "):\n"
@@ -209,7 +211,8 @@ const char help_msg[] =
     reverse_complement (DEFAULT_RC_TYPE),
     quiet (false),
     affine (true),
-    include_reference (false) {
+    include_reference (false),
+    memory_ref(nullptr){
         // skip arg[0], it's just the program name
         for (int i = 1; i < argc; ++i ) {
             const char * arg = argv[i];
@@ -266,11 +269,15 @@ const char help_msg[] =
         if ( scores ) {
             delete scores;
         }
+        
+        if (memory_ref) {
+            delete memory_ref;
+        }
     }
 
     /**
      * Parses the output file path from a command-line argument.
-     * Opens the output file for writing. If the argument is "-", stdout is used.
+     * Opens the output file for writing. If the argument is "," stdout is used.
      *
      * @param str The path to the output file.
      */
@@ -287,7 +294,7 @@ const char help_msg[] =
 
     /**
      * Parses the input file path from a command-line argument.
-     * Opens the input file for reading. If the argument is "-", stdin is used.
+     * Opens the input file for reading. If the argument is "," stdin is used.
      *
      * @param str The path to the input file.
      */
@@ -309,12 +316,25 @@ const char help_msg[] =
      * @param str The path to the reference file.
      */
     void args_t::parse_reference ( const char * str ) {
-        if ( str ) {
-            reference = check_file_path (str, REF_SUBPATH);
-            if ( ! reference )
-                ERROR( "failed to open the REFERENCE file %s", str );
+    if ( str ) {
+        reference = check_file_path (str, REF_SUBPATH);
+        if ( ! reference ) {
+            // if it is not a file, treat as a literal sequence
+            char* buffer;
+            size_t buffer_size;
+            // use a string stream to create the fasta entry
+            memory_ref = new StringBuffer;
+            memory_ref->appendBuffer (">REFERENCE\n");
+            memory_ref->appendBuffer(str);
+            // get the string and its size
+            // create an in-memory file
+            reference = fmemopen(memory_ref->getString(), memory_ref->length() + 1, "rb");
+            if (!reference) {
+                ERROR( "failed to open the memory REFERENCE file %s", str );
+            }
         }
     }
+}
 
     /**
      * Parses the scores file path from a command-line argument.

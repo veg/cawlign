@@ -36,9 +36,9 @@ int main (int argc, const char * argv[]) {
     
     initAlphabets(args.data_type == protein);
     
-    if (args.out_format == refalign) {
-        ERROR_NO_USAGE ("This output mode is currently not implemented.");
-    }
+    //if (args.out_format == refalign) {
+    //    ERROR_NO_USAGE ("This output mode is currently not implemented.");
+    //}
     
     if (args.reverse_complement != none) {
         if (args.data_type == protein) {
@@ -82,6 +82,7 @@ int main (int argc, const char * argv[]) {
     if (fasta_result == 1) {
         ERROR_NO_USAGE ("The FASTA reference sequence could not be parsed.");
     }
+    
     referenceSequenceLength++;
     
     if (args.data_type == codon) {
@@ -393,10 +394,13 @@ int main (int argc, const char * argv[]) {
                     alignedQrySeq = result2.getString();
                     result2.detach();
                     
-                    if (args.out_format == pairwise) {
+                    
+                    if (args.out_format == pairwise || args.out_format == refalign) {
+                        
                         result1.flip();
                         alignedRefSeq = result1.getString();
                         result1.detach();
+                       
                     }
                     
                     delete[]    alignment_route;
@@ -501,6 +505,7 @@ int main (int argc, const char * argv[]) {
                 if (args.out_format == pairwise) {
 #pragma omp critical
                     {
+                            
                         fprintf (args.output, ">%s\n%s\n>%s%s\n%s\n", refName.getString(), alignedRefSeq, names.getString(), rc_seq_tag, alignedQrySeq);
                     }
                     
@@ -512,7 +517,16 @@ int main (int argc, const char * argv[]) {
                                 fprintf (args.output, ">%s\n%s\n", refName.getString(), refSequence.getString());
                             }
                         }
-                        fprintf (args.output, ">%s%s\n%s\n", names.getString(), rc_seq_tag, alignedQrySeq);
+ 
+                        if (args.out_format == refalign) {
+                           for (int i = 0; alignedRefSeq[i]; i++) {
+                               if (alignedRefSeq[i] == '-') {
+                                   alignedQrySeq[i] = tolower (alignedQrySeq[i]);
+                               }
+                           }
+                       }
+
+                       fprintf (args.output, ">%s%s\n%s\n", names.getString(), rc_seq_tag, alignedQrySeq);
                     }
                     
                     

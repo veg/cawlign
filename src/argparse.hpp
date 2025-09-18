@@ -15,6 +15,8 @@
 #define DEFAULT_OUTPUT_FORMAT    refmap
 #define DEFAULT_RC_TYPE          none
 
+#include "stringBuffer.h"
+
 #ifndef VERSION_NUMBER
     #define VERSION_NUMBER            "0.0.1"
 #endif
@@ -76,6 +78,8 @@ namespace argparse
         bool            quiet;
         bool            affine;
         bool            include_reference;
+       
+       StringBuffer*   memory_ref;
         
       
         args_t( int, const char ** );
