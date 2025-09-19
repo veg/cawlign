@@ -392,11 +392,14 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
             long resolutions [HY_MAXIMUM_RESOLUTIONS],
             res_count = construct_resolutions (query[ q - 3 ], query[ q - 2 ], query[ q - 1 ], resolutions);
             if (res_count) {
-                cawlign_fp score = 0.;
+                cawlign_fp score = -1.e100;
                 for (long i = 0; i < res_count; i++) {
-                    score += cost_matrix[ r_codon * cost_stride + resolutions[i]];
+                   cawlign_fp score_res = cost_matrix[ r_codon * cost_stride + resolutions[i]];
+                    if (score_res > score) {
+                        score = score_res;
+                    }
                 }
-                score /= res_count;
+                //score /= res_count;
                 choices[ HY_111_111 ] = score_matrix[ prev - 3 ] + score;
             } else {
                 choices[ HY_111_111 ] = score_matrix[ prev - 3 ] + cost_matrix[ r_codon * cost_stride + cost_stride - 1 ];
