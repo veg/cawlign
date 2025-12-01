@@ -14,7 +14,7 @@ aminoacids = ARNDCQEGHILKMFPSTWYVBZX*
 ; for example 
 ; translations = A,C,D, ... would mean that AAA maps to "A", AAC maps to "R", etc
 
-; Universal codon table
+; Universal codon table (cawlign defaults to universal genetic code when no codon table is specified in the configuration)
 translations = K,N,K,N,T,T,T,T,R,S,R,S,I,I,M,I,Q,H,Q,H,P,P,P,P,R,R,R,R,L,L,L,L,E,D,E,D,A,A,A,A,G,G,G,G,V,V,V,V,X,Y,X,Y,S,S,S,S,X,C,W,C,L,F,L,F
 
 ; resolutions of ambiguous characters to consider

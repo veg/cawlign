@@ -1,6 +1,8 @@
 
 #include "scoring.hpp"
 
+#include <fstream>
+
 #ifdef _OPENMP
     #include <omp.h>
 #endif
@@ -97,6 +99,7 @@ CawalignSimpleScores::CawalignSimpleScores (
         ERROR_NO_USAGE ("Empty/missing alphabet");
     }
     _init_alphabet ();
+    // Cost matrix still comes from the scoring configuration, not the genetic-code file.
     vector<cawlign_fp> _scores = settings->aConfigVec<cawlign_fp>("MATRIX", "cost");
     if (_scores.size() != (D+1) * (D+1)) {
         ERROR_NO_USAGE ("The dimension of the cost matrix is incorrect");
@@ -145,13 +148,33 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings, const char * 
     
     gap_char = '-';
 
-    string code_section = "CODE";
+    // Determine where to read aminoacids / translations / resolutions from.
+    // If a genetic_code is provided, load these from a dedicated genetic-code file.
+    // Otherwise, fall back to the CODE section in the scoring config.
+
+    ConfigParser *code_settings = settings;
+    ConfigParser *owned_code_settings = nullptr;
+    std::string code_section = "CODE";
+
     if (genetic_code && genetic_code[0]) {
-        code_section += "_";
-        code_section += genetic_code;
+        // std::string code_name = genetic_code;
+
+        // // Map some common identifiers to filenames, defaulting to the raw string.
+        // if (code_name == "1" || code_name == "standard" || code_name == "Standard") {
+        //     code_name = "universal";
+        // }
+
+        // std::ifstream code_stream = check_file_path_stream(code_name.c_str(), GENETIC_CODES_SUBPATH);
+        // if (!code_stream.is_open()) {
+        //     ERROR_NO_USAGE ("failed to open the genetic code file %s", code_name.c_str());
+        // }
+
+        owned_code_settings = new ConfigParser(code_stream);
+        code_settings = owned_code_settings;
+        code_section = "CODE";
     }
 
-    string _alph = settings->aConfig<string>(code_section, "aminoacids");
+    string _alph = code_settings->aConfig<string>(code_section, "aminoacids");
     
     const  long aaD = _alph.size();
     if (aaD < 21) {
@@ -196,7 +219,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings, const char * 
         }
     }
     
-    vector<string> _translations = settings->aConfigVec<string>(code_section, "translations");
+    vector<string> _translations = code_settings->aConfigVec<string>(code_section, "translations");
     
     if (_translations.size() != 64) {
         ERROR_NO_USAGE ("Expected a vector with 64 translations (CODE:translations)");
@@ -214,7 +237,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings, const char * 
         translation_table.appendValue(translation_token);
     }
     
-    vector<string> _resolutions = settings->aConfigVec<string>(code_section, "resolutions");
+    vector<string> _resolutions = code_settings->aConfigVec<string>(code_section, "resolutions");
     
     bool stash_char = true;
     
@@ -254,6 +277,11 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings, const char * 
                 ERROR_NO_USAGE ("All ambiguiity resolutions must be single characters");
             }
         }
+    }
+
+    if (owned_code_settings) {
+        delete owned_code_settings;
+        owned_code_settings = nullptr;
     }
 
     synonymous_penalty = 1.;

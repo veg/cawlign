@@ -215,7 +215,7 @@ const char help_msg[] =
     affine (true),
     include_reference (false),
     memory_ref(nullptr),
-    genetic_code(){
+    genetic_code(DEFAULT_GENETIC_CODE){
         // skip arg[0], it's just the program name
         for (int i = 1; i < argc; ++i ) {
             const char * arg = argv[i];
@@ -272,6 +272,10 @@ const char help_msg[] =
         
         if ( scores ) {
             delete scores;
+        }
+
+        if (!genetic_code.empty()) {
+            genetic_code.clear();
         }
         
         if (memory_ref) {
@@ -467,11 +471,39 @@ const char help_msg[] =
 
     /**
      * Parses the genetic code identifier from a command-line argument.
+     *
+     * @param str The genetic code identifier. Can be a code name (e.g., "universal") or file path.
      */
     void args_t::parse_genetic_code ( const char * str ) {
-        if (str) {
-            genetic_code = str;
+        // Map some common identifiers to filenames, defaulting to the raw string.
+        if (str == "1" || str == "standard" || str == "Standard") {
+            code_name = "universal";
         }
+
+        std::ifstream code_stream = check_file_path_stream(str.c_str(), GENETIC_CODES_SUBPATH);
+        if (!code_stream.is_open()) {
+            ERROR_NO_USAGE ("failed to open the genetic code file %s", str.c_str());
+        }
+
+        // TODO: Pass the ConfigParser initialized in parse_scores and add genetic code data
+        // (or initialize it here and pass it to the scores parser)
     }
+
+    // FOR REFERENCE - Original scores parsing function
+    // /**
+    //  * Parses the scores file path from a command-line argument.
+    //  * Opens the scores file using an ifstream and initializes a ConfigParser.
+    //  *
+    //  * @param str The path to the scores file.
+    //  */
+    // void args_t::parse_scores ( const char * str ) {
+    //     if ( str ) {
+    //         ifstream score_stream = check_file_path_stream(str, SCORES_SUBPATH);
+    //         if ( ! score_stream.is_open() )
+    //             ERROR( "failed to open the SCORES file %s", str );
+    //         scores = new ConfigParser (score_stream);
+            
+    //     }
+    // }
 
 }
