@@ -26,6 +26,7 @@ const char usage[] =
 "[-r REFERENCE] "
 "[-s SCORE] "
 "[-t DATATYPE] "
+"[-c GENETIC_CODE] "
 "[-l LOCAL_ALIGNMENT] "
 "[-f FORMAT] "
 "[-S SPACE] "
@@ -54,6 +55,7 @@ const char help_msg[] =
 "                           nucleotide : align sequences in the nucleotide space;\n"
 "                           protein    : align sequences in the protein space;\n"
 "                           codon: align sequences in the codon space (reference must be in frame; stop codons are defined in the scoring file);\n"
+"  -c GENETIC_CODE          genetic code identifier (NCBI code like 1, 2, 4, or a name like standard);\n"
 "  -R REVERSE_COMPLEMENT    options of reverse complementation [rc] (default=" TO_STR( DEFAULT_RC_TYPE ) ")\n"
 "                           none       : do not consider reverse complements of sequences;\n"
 "                           silent     : align both the sequence and its rc to the reference, select the one with the highest score and report it;\n"
@@ -212,7 +214,8 @@ const char help_msg[] =
     quiet (false),
     affine (true),
     include_reference (false),
-    memory_ref(nullptr){
+    memory_ref(nullptr),
+    genetic_code(){
         // skip arg[0], it's just the program name
         for (int i = 1; i < argc; ++i ) {
             const char * arg = argv[i];
@@ -230,6 +233,7 @@ const char help_msg[] =
                 else if (  arg[1] == 'r' ) parse_reference ( next_arg (i, argc, argv) );
                 else if (  arg[1] == 's')  parse_scores( next_arg (i, argc, argv) );
                 else if (  arg[1] == 't')  parse_data_t( next_arg (i, argc, argv) );
+                else if (  arg[1] == 'c')  parse_genetic_code( next_arg (i, argc, argv) );
                 else if (  arg[1] == 'f')  parse_out_format_t( next_arg (i, argc, argv) );
                 else if (  arg[1] == 'S')  parse_space_t( next_arg (i, argc, argv) );
                 else if (  arg[1] == 'l')  parse_local_t( next_arg (i, argc, argv) );
@@ -459,6 +463,15 @@ const char help_msg[] =
      */
     void args_t::parse_quiet() {
         quiet = true;
+    }
+
+    /**
+     * Parses the genetic code identifier from a command-line argument.
+     */
+    void args_t::parse_genetic_code ( const char * str ) {
+        if (str) {
+            genetic_code = str;
+        }
     }
 
 }

@@ -136,7 +136,7 @@ StringBuffer codon_string (long c1) {
  *
  * @param settings A pointer to a `ConfigParser` object containing configuration settings.
  */
-CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
+CawalignCodonScores::CawalignCodonScores (ConfigParser * settings, const char * genetic_code) {
     alphabet.appendBuffer(kNucleotideAlphabet);
     
     D = 4;
@@ -144,7 +144,14 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
     D = 64;
     
     gap_char = '-';
-    string _alph = settings->aConfig<string>("CODE", "aminoacids");
+
+    string code_section = "CODE";
+    if (genetic_code && genetic_code[0]) {
+        code_section += "_";
+        code_section += genetic_code;
+    }
+
+    string _alph = settings->aConfig<string>(code_section, "aminoacids");
     
     const  long aaD = _alph.size();
     if (aaD < 21) {
@@ -189,7 +196,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
         }
     }
     
-    vector<string> _translations = settings->aConfigVec<string>("CODE", "translations");
+    vector<string> _translations = settings->aConfigVec<string>(code_section, "translations");
     
     if (_translations.size() != 64) {
         ERROR_NO_USAGE ("Expected a vector with 64 translations (CODE:translations)");
@@ -207,7 +214,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
         translation_table.appendValue(translation_token);
     }
     
-    vector<string> _resolutions = settings->aConfigVec<string>("CODE", "resolutions");
+    vector<string> _resolutions = settings->aConfigVec<string>(code_section, "resolutions");
     
     bool stash_char = true;
     

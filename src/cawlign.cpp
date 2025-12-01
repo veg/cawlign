@@ -65,7 +65,11 @@ int main (int argc, const char * argv[]) {
         alignmentScoring = new CawalignSimpleScores (kNucleotideAlphabet, kNucScoring, 10., 10., 0.5, 0.5);
     } else {
         if (args.data_type == codon) {
-            alignmentScoring = new CawalignCodonScores (args.scores);
+            const char * genetic_code = nullptr;
+            if (!args.genetic_code.empty()) {
+                genetic_code = args.genetic_code.c_str();
+            }
+            alignmentScoring = new CawalignCodonScores (args.scores, genetic_code);
         } else {
             alignmentScoring = new CawalignSimpleScores (args.scores);
         }

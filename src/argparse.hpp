@@ -3,6 +3,7 @@
 #define ARGPARSE_H
 
 #include <stdio.h>
+#include <string>
 #include <configparser.hpp>
 // argument defaults
 
@@ -80,6 +81,8 @@ namespace argparse
         bool            include_reference;
        
        StringBuffer*   memory_ref;
+
+       std::string     genetic_code;
         
       
         args_t( int, const char ** );
@@ -98,6 +101,7 @@ namespace argparse
         void parse_data_t       ( const char * );
         void parse_local_t      ( const char * );
         void parse_out_format_t ( const char * );
+        void parse_genetic_code ( const char * );
 
     };
 
