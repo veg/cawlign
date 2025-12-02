@@ -34,7 +34,7 @@ $make install
 #### Usage
 
 ```
-usage: cawlign [-h] [-v] [-o OUTPUT] [-r REFERENCE] [-s SCORE] [-t DATATYPE] [-l LOCAL_ALIGNMENT] [-f FORMAT] [-S SPACE] [-a] [-q] [-I] [FASTA]
+usage: cawlign [-h] [-v] [-o OUTPUT] [-r REFERENCE] [-s SCORE] [-t DATATYPE] [-c GENETIC_CODE] [-l LOCAL_ALIGNMENT] [-f FORMAT] [-S SPACE] [-a] [-q] [-I] [FASTA]
 
 perform a pairwise alignment between a reference sequence and a set of other sequences
 
@@ -53,6 +53,9 @@ optional arguments:
                            nucleotide : align sequences in the nucleotide space;
                            protein    : align sequences in the protein space;
                            codon: align sequences in the codon space (reference must be in frame; stop codons are defined in the scoring file);
+  -c GENETIC_CODE          genetic code identifier (NCBI code like 1, 2, 4, or a name like standard/universal);
+                           only used when -t codon is selected. If omitted with -t codon, the universal code is used by default.
+                           When installed, genetic code files are looked up under /usr/local/share/cawlign/genetic_codes.
   -l LOCAL_ALIGNMENT       global/local alignment (default=trim)
                            global : full string alignment; all gaps in the alignments are scored the same
                            local  : partial string local (smith-waterman type) alignment which maximizes the alignment score

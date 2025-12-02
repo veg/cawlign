@@ -215,7 +215,8 @@ const char help_msg[] =
     affine (true),
     include_reference (false),
     memory_ref(nullptr),
-    genetic_code(DEFAULT_GENETIC_CODE){
+    genetic_code(nullptr),
+    code_name(DEFAULT_GENETIC_CODE){
         // skip arg[0], it's just the program name
         for (int i = 1; i < argc; ++i ) {
             const char * arg = argv[i];
@@ -254,6 +255,12 @@ const char help_msg[] =
         if ( !reference ) {
             parse_reference ( DEFAULT_REFERENCE );
         }
+
+        // If codon data type is requested and no genetic code was supplied,
+        // default to the universal genetic code.
+        if (data_type == codon && genetic_code == nullptr) {
+            parse_genetic_code (DEFAULT_GENETIC_CODE);
+        }
     }
 
     /**
@@ -274,8 +281,8 @@ const char help_msg[] =
             delete scores;
         }
 
-        if (!genetic_code.empty()) {
-            genetic_code.clear();
+        if ( genetic_code ) {
+            delete genetic_code;
         }
         
         if (memory_ref) {
@@ -475,35 +482,34 @@ const char help_msg[] =
      * @param str The genetic code identifier. Can be a code name (e.g., "universal") or file path.
      */
     void args_t::parse_genetic_code ( const char * str ) {
-        // Map some common identifiers to filenames, defaulting to the raw string.
-        if (str == "1" || str == "standard" || str == "Standard") {
+        if ( str ) {
+            // Map some common identifiers to filenames, defaulting to the raw string.
+            if (!strcmp (str, "1") || !strcmp (str, "standard") || !strcmp (str, "Standard") || !strcmp (str, "Universal")) {
+                code_name = "universal";
+            } else {
+                code_name = str;
+            }
+
+            // TODO: add support for different genetic code formats provided as numbers
+            // For now, we'll ignore numeric codes and only deal with file names
+            // Numeric codes would need to be converted to filenames here
+            // For example: "1" -> "universal", "2" -> "mitochondrial"
+
+            std::ifstream code_stream = check_file_path_stream(code_name.c_str(), GENETIC_CODES_SUBPATH);
+            if (!code_stream.is_open()) {
+                ERROR_NO_USAGE ("failed to open the genetic code file %s", code_name.c_str());
+            }
+
+            genetic_code = new ConfigParser(code_stream);
+        } else {
+            // If no genetic code is provided, use default (universal)
             code_name = "universal";
+            std::ifstream code_stream = check_file_path_stream(code_name.c_str(), GENETIC_CODES_SUBPATH);
+            if (!code_stream.is_open()) {
+                ERROR_NO_USAGE ("failed to open the default genetic code file %s", code_name.c_str());
+            }
+            genetic_code = new ConfigParser(code_stream);
         }
-
-        std::ifstream code_stream = check_file_path_stream(str.c_str(), GENETIC_CODES_SUBPATH);
-        if (!code_stream.is_open()) {
-            ERROR_NO_USAGE ("failed to open the genetic code file %s", str.c_str());
-        }
-
-        // TODO: Pass the ConfigParser initialized in parse_scores and add genetic code data
-        // (or initialize it here and pass it to the scores parser)
     }
-
-    // FOR REFERENCE - Original scores parsing function
-    // /**
-    //  * Parses the scores file path from a command-line argument.
-    //  * Opens the scores file using an ifstream and initializes a ConfigParser.
-    //  *
-    //  * @param str The path to the scores file.
-    //  */
-    // void args_t::parse_scores ( const char * str ) {
-    //     if ( str ) {
-    //         ifstream score_stream = check_file_path_stream(str, SCORES_SUBPATH);
-    //         if ( ! score_stream.is_open() )
-    //             ERROR( "failed to open the SCORES file %s", str );
-    //         scores = new ConfigParser (score_stream);
-            
-    //     }
-    // }
 
 }

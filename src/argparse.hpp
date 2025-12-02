@@ -77,7 +77,7 @@ namespace argparse
         space_t         space_type;
         out_format_t    out_format;
         rc_t            reverse_complement;
-        std::string     genetic_code;
+        ConfigParser    * genetic_code;
         
         bool            quiet;
         bool            affine;
@@ -103,6 +103,8 @@ namespace argparse
         void parse_local_t      ( const char * );
         void parse_out_format_t ( const char * );
         void parse_genetic_code ( const char * );
+
+        std::string code_name;
 
     };
 
