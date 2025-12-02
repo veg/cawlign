@@ -149,32 +149,6 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * code_settings, ConfigPa
     
     gap_char = '-';
 
-    // Determine where to read aminoacids / translations / resolutions from.
-    // If a genetic_code is provided, load these from a dedicated genetic-code file.
-    // Otherwise, fall back to the CODE section in the scoring config.
-
-    // ConfigParser *code_score_settings = score_settings;
-    // ConfigParser *owned_code_score_settings = nullptr;
-    // std::string code_section = "CODE";
-
-    // if (genetic_code && genetic_code[0]) {
-    //     // std::string code_name = genetic_code;
-
-    //     // // Map some common identifiers to filenames, defaulting to the raw string.
-    //     // if (code_name == "1" || code_name == "standard" || code_name == "Standard") {
-    //     //     code_name = "universal";
-    //     // }
-
-    //     // std::ifstream code_stream = check_file_path_stream(code_name.c_str(), GENETIC_CODES_SUBPATH);
-    //     // if (!code_stream.is_open()) {
-    //     //     ERROR_NO_USAGE ("failed to open the genetic code file %s", code_name.c_str());
-    //     // }
-
-    //     owned_code_score_settings = new ConfigParser(code_stream);
-    //     code_score_settings = owned_code_score_settings;
-    //     code_section = "CODE";
-    // }
-
     string _alph = code_settings->aConfig<string>("CODE", "aminoacids");
     
     const  long aaD = _alph.size();
@@ -279,11 +253,6 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * code_settings, ConfigPa
             }
         }
     }
-
-    // if (owned_code_score_settings) {
-    //     delete owned_code_score_settings;
-    //     owned_code_score_settings = nullptr;
-    // }
 
     synonymous_penalty = 1.;
     /* first, define a 65x65 scoring matrix for all pairs of codons + sink (unresolved) state
