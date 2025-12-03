@@ -1,0 +1,26 @@
+# NCBI transl_table to cawlign genetic code filename mapping
+# Format: <number><space><filename>
+# Lines starting with # are comments. Extra whitespace is ignored.
+
+1 universal
+2 vertebrate-mtdna
+3 yeast-mtdna
+4 mold-protozoan-mtdna
+5 invertebrate-mtdna
+6 ciliate-nuclear
+9 echinoderm-mtdna
+10 euplotid-nuclear
+12 alt-yeast-nuclear
+13 ascidian-mtdna
+14 flatworm-mtdna
+15 blepharisma-nuclear
+16 chlorophycean-mtdna
+21 trematode-mtdna
+22 scenedesmus-obliquus-mtdna
+23 thraustochytrium-mtdna
+24 pterobranchia-mtdna
+25 sr1-and-gracilibacteria
+26 pachysolen-nuclear
+29 mesodinium-nuclear
+30 peritrich-nuclear
+33 cephalodiscidae-mtdna

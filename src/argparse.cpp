@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cctype>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -487,17 +488,40 @@ const char help_msg[] =
             if (!strcmp (str, "1") || !strcmp (str, "standard") || !strcmp (str, "Standard") || !strcmp (str, "Universal")) {
                 code_name = "universal";
             } else {
-                code_name = str;
+                bool numeric = true;
+                for (const char* p = str; *p; ++p) {
+                    if (!isdigit((unsigned char)*p)) { numeric = false; break; }
+                }
+                if (numeric) {
+                    // read mapping from a file in the genetic_codes resource directory
+                    const char * map_file = "ncbi-codon-map";
+                    std::ifstream map_stream = check_file_path_stream(map_file, GENETIC_CODES_SUBPATH);
+                    if (!map_stream.is_open()) {
+                        ERROR_NO_USAGE ("failed to open the genetic code mapping file %s", map_file);
+                    }
+                    std::string line;
+                    bool found = false;
+                    while (std::getline(map_stream, line)) {
+                        if (line.empty()) { continue; }
+                        size_t pos = 0; while (pos < line.size() && isspace((unsigned char)line[pos])) ++pos;
+                        if (pos >= line.size() || line[pos] == '#') { continue; }
+                        std::istringstream iss(line);
+                        std::string num, name;
+                        if (iss >> num >> name) {
+                            if (num == std::string(str)) { code_name = name; found = true; break; }
+                        }
+                    }
+                    if (!found) {
+                        ERROR_NO_USAGE ("unknown NCBI genetic code number %s", str);
+                    }
+                } else {
+                    code_name = str;
+                }
             }
-
-            // TODO: add support for different genetic code formats provided as numbers
-            // For now, we'll ignore numeric codes and only deal with file names
-            // Numeric codes would need to be converted to filenames here
-            // For example: "1" -> "universal", "2" -> "mitochondrial"
 
             std::ifstream code_stream = check_file_path_stream(code_name.c_str(), GENETIC_CODES_SUBPATH);
             if (!code_stream.is_open()) {
-                ERROR_NO_USAGE ("failed to open the genetic code file %s", code_name.c_str());
+                ERROR_NO_USAGE ("Unknown genetic code %s", code_name.c_str());
             }
 
             genetic_code = new ConfigParser(code_stream);
