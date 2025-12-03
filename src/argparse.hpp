@@ -3,11 +3,13 @@
 #define ARGPARSE_H
 
 #include <stdio.h>
+#include <string>
 #include <configparser.hpp>
 // argument defaults
 
 #define PROGNAME                 "cawlign"
 #define DEFAULT_DATA_TYPE        nucleotide
+#define DEFAULT_GENETIC_CODE     "universal"
 #define DEFAULT_REFERENCE        "HXB2_pol"
 #define DEFAULT_SCORING          "Nucleotide-BLAST"
 #define DEFAULT_SPACE            quadratic
@@ -25,8 +27,9 @@
     #define LIBRARY_PATH            "/usr/local/shares/cawlign/"
 #endif
 
-#define SCORES_SUBPATH "scoring"
-#define REF_SUBPATH    "references"
+#define SCORES_SUBPATH        "scoring"
+#define REF_SUBPATH           "references"
+#define GENETIC_CODES_SUBPATH "genetic_codes"
 
 namespace argparse
 {
@@ -74,14 +77,15 @@ namespace argparse
         space_t         space_type;
         out_format_t    out_format;
         rc_t            reverse_complement;
+        ConfigParser    * genetic_code;
         
         bool            quiet;
         bool            affine;
         bool            include_reference;
        
        StringBuffer*   memory_ref;
+
         
-      
         args_t( int, const char ** );
         ~args_t();
         
@@ -98,10 +102,16 @@ namespace argparse
         void parse_data_t       ( const char * );
         void parse_local_t      ( const char * );
         void parse_out_format_t ( const char * );
+        void parse_genetic_code ( const char * );
+
+        std::string code_name;
 
     };
 
     void ERROR_NO_USAGE ( const char * msg, ... );
+
+    // defined in argparse.cpp
+    std::ifstream check_file_path_stream (const char* path, const char * subpath);
 }
 
 #endif // ARGPARSE_H

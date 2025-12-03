@@ -61,7 +61,7 @@ class CawalignSimpleScores {
 class CawalignCodonScores : public CawalignSimpleScores {
     public:
     
-        CawalignCodonScores  (ConfigParser*);
+        CawalignCodonScores  (ConfigParser*, ConfigParser*);
         virtual ~CawalignCodonScores (void) {};
     
         // compute how many nucleotides are different between the two codons encoded as 0-63 integers

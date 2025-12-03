@@ -57,7 +57,7 @@ int main (int argc, const char * argv[]) {
     if (args.reference == nullptr) {
         ERROR_NO_USAGE ("No reference sequence has been found.");
     }
-    
+
     if (args.scores == nullptr) {
         if (args.data_type != nucleotide) {
             ERROR_NO_USAGE ("Default scoring is only available for nucleotide data. Please provide a suitable scoring file as a -s argument.");
@@ -65,7 +65,7 @@ int main (int argc, const char * argv[]) {
         alignmentScoring = new CawalignSimpleScores (kNucleotideAlphabet, kNucScoring, 10., 10., 0.5, 0.5);
     } else {
         if (args.data_type == codon) {
-            alignmentScoring = new CawalignCodonScores (args.scores);
+            alignmentScoring = new CawalignCodonScores (args.genetic_code, args.scores);
         } else {
             alignmentScoring = new CawalignSimpleScores (args.scores);
         }
