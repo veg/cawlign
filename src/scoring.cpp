@@ -1,8 +1,6 @@
 
 #include "scoring.hpp"
 
-#include <fstream>
-
 #ifdef _OPENMP
     #include <omp.h>
 #endif

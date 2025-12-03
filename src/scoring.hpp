@@ -46,7 +46,7 @@ class CawalignSimpleScores {
                 substitutions in reference/query weigted differently
         */
     
-        cawlign_fp              open_gap_reference,
+        cawlign_fp          open_gap_reference,
                             open_gap_query,
                             extend_gap_query,
                             extend_gap_reference;
