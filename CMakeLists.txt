@@ -50,6 +50,21 @@ target_compile_options (cawlign_debug PRIVATE -O0 -std=c++14  -g -fsanitize=addr
 target_link_options (cawlign_debug PRIVATE -O0 -std=c++14  -g -fsanitize=address)
 
 
+add_executable(
+    cawlign_prof EXCLUDE_FROM_ALL
+    src/alignment.cpp
+    src/stringBuffer.cc
+    src/tn93_shared.cc
+    src/argparse.cpp
+    src/cawlign.cpp
+    src/configparser.cpp
+    src/scoring.cpp
+)
+
+target_compile_options (cawlign_prof PRIVATE -g -O3 -std=c++14  -funroll-loops)
+target_link_options (cawlign_prof PRIVATE -g -O3 -march=native -std=c++14 -funroll-loops)
+
+
 set_property(
     TARGET cawlign
     APPEND PROPERTY COMPILE_DEFINITIONS LIBRARY_PATH="${INSTALL_PREFIX}/share/cawlign"
@@ -67,6 +82,7 @@ if(${OPENMP_FOUND})
    add_definitions(${OpenMP_CXX_FLAGS})
    target_link_libraries(cawlign PRIVATE ${DEFAULT_LIBRARIES} OpenMP::OpenMP_CXX)
    target_link_libraries(cawlign_debug PRIVATE ${DEFAULT_LIBRARIES} OpenMP::OpenMP_CXX)
+   target_link_libraries(cawlign_prof PRIVATE ${DEFAULT_LIBRARIES} OpenMP::OpenMP_CXX)
 endif(${OPENMP_FOUND})
 
 
