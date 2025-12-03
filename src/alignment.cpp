@@ -580,6 +580,7 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
                                       + query[ q - codon_spec_3x4[ i ][ 2 ] ] ;
             }
             // fill in choices
+            const cawlign_fp previous_score = score_matrix[ prev - 4 ];
             for (long i = 0; i < HY_3X4_COUNT; ++i ) {
                 if ( partial_codons[ i ] >= 0 ) {
                     choice = HY_3X4_START + i;
@@ -592,9 +593,7 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
                     else
                         penalty = miscall_cost;
 
-                    const cawlign_fp move_cost = codon3x4[ r_codon * offset3x4 + HY_3X4_COUNT * partial_codons[ i ] + i ];
-
-                    choices[ choice ] = score_matrix[ prev - 4 ] - penalty + move_cost;
+                    choices[ choice ] = previous_score - penalty + codon3x4[ r_codon * offset3x4 + HY_3X4_COUNT * partial_codons[ i ] + i ];
                     //if (do_local && choices [HY_LOCAL_ALIGN_SHORTCUT] < move_cost) {
                     //    local_shortcut_came_from_this_move = choice;
                     //    choices [HY_LOCAL_ALIGN_SHORTCUT]  = move_cost;

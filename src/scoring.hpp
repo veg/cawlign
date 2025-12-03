@@ -46,7 +46,7 @@ class CawalignSimpleScores {
                 substitutions in reference/query weigted differently
         */
     
-        cawlign_fp              open_gap_reference,
+        cawlign_fp          open_gap_reference,
                             open_gap_query,
                             extend_gap_query,
                             extend_gap_reference;
@@ -61,7 +61,7 @@ class CawalignSimpleScores {
 class CawalignCodonScores : public CawalignSimpleScores {
     public:
     
-        CawalignCodonScores  (ConfigParser*);
+        CawalignCodonScores  (ConfigParser*, ConfigParser*);
         virtual ~CawalignCodonScores (void) {};
     
         // compute how many nucleotides are different between the two codons encoded as 0-63 integers

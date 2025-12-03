@@ -1,0 +1,21 @@
+[CODE]
+
+; a string of amino acids (the score matrix is defined in terms of those amino acids)
+; using the string order for indexing
+; X means a stop
+; * means something that is not resolved
+; both X and * are expected to be present
+
+aminoacids = ARNDCQEGHILKMFPSTWYVBZX*
+
+; translations are defined as a map between alphabetically sorted codons (AAA, AAC, ..., TTT)
+; for example 
+; translations = K,N,K, ... would mean that AAA maps to "K", AAC maps to "N", AAG maps to "K", etc
+
+translations = K,N,K,N,T,T,T,T,X,S,X,S,M,I,M,I,Q,H,Q,H,P,P,P,P,R,R,R,R,L,L,L,L,E,D,E,D,A,A,A,A,G,G,G,G,V,V,V,V,X,Y,X,Y,S,S,S,S,W,C,W,C,L,F,L,F
+
+; resolutions of ambiguous characters to consider
+; the are of the form
+; A,X1,X2,,
+
+resolutions = R,A,G,,Y,C,T,,S,C,G,,W,A,T,,M,A,C,,K,G,T,,H,A,C,T,,B,C,G,T,,V,A,C,G,,D,A,G,T,,N,A,C,G,T

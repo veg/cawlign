@@ -76,36 +76,37 @@ CawalignSimpleScores::CawalignSimpleScores (
 }
 
 /**
- * Constructs a `CawalignSimpleScores` object using configuration settings.
+ * Constructs a `CawalignSimpleScores` object using configuration score_settings.
  *
  * This constructor reads configuration values from a `ConfigParser` to initialize the alphabet,
  * scoring matrix, and gap penalties. Throws errors if the alphabet is missing or the scoring matrix dimensions are incorrect.
  *
- * @param settings A pointer to a `ConfigParser` object containing configuration settings.
+ * @param score_settings A pointer to a `ConfigParser` object containing configuration score settings.
  */
 CawalignSimpleScores::CawalignSimpleScores (
-                                      ConfigParser * settings
+                                      ConfigParser * score_settings
                                       ) :
             alphabet(),
             scoring_matrix(),
             gap_char ('-')
 {
-    string _alph = settings->aConfig<string>("ALPHABET", "alphabet");
+    string _alph = score_settings->aConfig<string>("ALPHABET", "alphabet");
     alphabet.appendBuffer(_alph.c_str());
     D = (unsigned int)alphabet.length();
     if (D == 0) {
         ERROR_NO_USAGE ("Empty/missing alphabet");
     }
     _init_alphabet ();
-    vector<cawlign_fp> _scores = settings->aConfigVec<cawlign_fp>("MATRIX", "cost");
+    // Cost matrix still comes from the scoring configuration, not the genetic-code file.
+    vector<cawlign_fp> _scores = score_settings->aConfigVec<cawlign_fp>("MATRIX", "cost");
     if (_scores.size() != (D+1) * (D+1)) {
         ERROR_NO_USAGE ("The dimension of the cost matrix is incorrect");
     }
     scoring_matrix.appendValues((cawlign_fp*)_scores.data(), (D+1)*(D+1));
-    open_gap_reference  = settings->aConfig<cawlign_fp>("PARAMETERS", "open_deletion");
-    open_gap_query      = settings->aConfig<cawlign_fp>("PARAMETERS", "open_insertion");
-    extend_gap_reference  = settings->aConfig<cawlign_fp>("PARAMETERS", "extend_deletion");
-    extend_gap_query      = settings->aConfig<cawlign_fp>("PARAMETERS", "extend_insertion");
+    open_gap_reference  = score_settings->aConfig<cawlign_fp>("PARAMETERS", "open_deletion");
+    open_gap_query      = score_settings->aConfig<cawlign_fp>("PARAMETERS", "open_insertion");
+    extend_gap_reference  = score_settings->aConfig<cawlign_fp>("PARAMETERS", "extend_deletion");
+    extend_gap_query      = score_settings->aConfig<cawlign_fp>("PARAMETERS", "extend_insertion");
 }
 
 /**
@@ -128,15 +129,16 @@ StringBuffer codon_string (long c1) {
 }
 
 /**
- * Constructs a `CawalignCodonScores` object using configuration settings.
+ * Constructs a `CawalignCodonScores` object using configuration score_settings.
  *
  * This constructor initializes the codon scoring system using values from a `ConfigParser`.
  * It sets up the codon translation table, stop codon index, mismatch index, and scoring matrices for codon alignments.
  * Throws errors if the amino acid alphabet is incomplete or the translation table is invalid.
  *
- * @param settings A pointer to a `ConfigParser` object containing configuration settings.
+ * @param code_settings A pointer to a `ConfigParser` object containing genetic code settings.
+ * @param score_settings A pointer to a `ConfigParser` object containing configuration score_settings.
  */
-CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
+CawalignCodonScores::CawalignCodonScores (ConfigParser * code_settings, ConfigParser * score_settings) {
     alphabet.appendBuffer(kNucleotideAlphabet);
     
     D = 4;
@@ -144,7 +146,8 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
     D = 64;
     
     gap_char = '-';
-    string _alph = settings->aConfig<string>("CODE", "aminoacids");
+
+    string _alph = code_settings->aConfig<string>("CODE", "aminoacids");
     
     const  long aaD = _alph.size();
     if (aaD < 21) {
@@ -172,7 +175,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
         ERROR_NO_USAGE ("Could not find the unresolved character '*' (CODE:aminoacids)");
     }
     
-    vector<cawlign_fp> _scores = settings->aConfigVec<cawlign_fp>("MATRIX", "cost");
+    vector<cawlign_fp> _scores = score_settings->aConfigVec<cawlign_fp>("MATRIX", "cost");
     if (_scores.size() != (aaD) * (aaD)) {
         ERROR_NO_USAGE ("The dimension of the cost matrix is incorrect (MATRIX:cost)");
     }
@@ -189,7 +192,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
         }
     }
     
-    vector<string> _translations = settings->aConfigVec<string>("CODE", "translations");
+    vector<string> _translations = code_settings->aConfigVec<string>("CODE", "translations");
     
     if (_translations.size() != 64) {
         ERROR_NO_USAGE ("Expected a vector with 64 translations (CODE:translations)");
@@ -207,7 +210,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
         translation_table.appendValue(translation_token);
     }
     
-    vector<string> _resolutions = settings->aConfigVec<string>("CODE", "resolutions");
+    vector<string> _resolutions = code_settings->aConfigVec<string>("CODE", "resolutions");
     
     bool stash_char = true;
     
@@ -402,11 +405,11 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * settings) {
     pad_vector (s3x5, 640);
     
     
-    open_gap_reference    = settings->aConfig<cawlign_fp>("PARAMETERS", "open_deletion");
-    open_gap_query        = settings->aConfig<cawlign_fp>("PARAMETERS", "open_insertion");
-    extend_gap_reference  = settings->aConfig<cawlign_fp>("PARAMETERS", "extend_deletion");
-    extend_gap_query      = settings->aConfig<cawlign_fp>("PARAMETERS", "extend_insertion");
-    frameshift_cost       = settings->aConfig<cawlign_fp>("PARAMETERS", "frameshift_cost");
+    open_gap_reference    = score_settings->aConfig<cawlign_fp>("PARAMETERS", "open_deletion");
+    open_gap_query        = score_settings->aConfig<cawlign_fp>("PARAMETERS", "open_insertion");
+    extend_gap_reference  = score_settings->aConfig<cawlign_fp>("PARAMETERS", "extend_deletion");
+    extend_gap_query      = score_settings->aConfig<cawlign_fp>("PARAMETERS", "extend_insertion");
+    frameshift_cost       = score_settings->aConfig<cawlign_fp>("PARAMETERS", "frameshift_cost");
         
     cawlign_fp indel_cost = MAX(max_score, -min_score),
                ext_cost = 3.*(max_score-min_score) / 60.;

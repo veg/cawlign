@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cctype>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -26,6 +27,7 @@ const char usage[] =
 "[-r REFERENCE] "
 "[-s SCORE] "
 "[-t DATATYPE] "
+"[-c GENETIC_CODE] "
 "[-l LOCAL_ALIGNMENT] "
 "[-f FORMAT] "
 "[-S SPACE] "
@@ -54,6 +56,7 @@ const char help_msg[] =
 "                           nucleotide : align sequences in the nucleotide space;\n"
 "                           protein    : align sequences in the protein space;\n"
 "                           codon: align sequences in the codon space (reference must be in frame; stop codons are defined in the scoring file);\n"
+"  -c GENETIC_CODE          genetic code identifier (NCBI code like 1, 2, 4, or a name like standard);\n"
 "  -R REVERSE_COMPLEMENT    options of reverse complementation [rc] (default=" TO_STR( DEFAULT_RC_TYPE ) ")\n"
 "                           none       : do not consider reverse complements of sequences;\n"
 "                           silent     : align both the sequence and its rc to the reference, select the one with the highest score and report it;\n"
@@ -212,7 +215,9 @@ const char help_msg[] =
     quiet (false),
     affine (true),
     include_reference (false),
-    memory_ref(nullptr){
+    memory_ref(nullptr),
+    genetic_code(nullptr),
+    code_name(DEFAULT_GENETIC_CODE){
         // skip arg[0], it's just the program name
         for (int i = 1; i < argc; ++i ) {
             const char * arg = argv[i];
@@ -230,6 +235,7 @@ const char help_msg[] =
                 else if (  arg[1] == 'r' ) parse_reference ( next_arg (i, argc, argv) );
                 else if (  arg[1] == 's')  parse_scores( next_arg (i, argc, argv) );
                 else if (  arg[1] == 't')  parse_data_t( next_arg (i, argc, argv) );
+                else if (  arg[1] == 'c')  parse_genetic_code( next_arg (i, argc, argv) );
                 else if (  arg[1] == 'f')  parse_out_format_t( next_arg (i, argc, argv) );
                 else if (  arg[1] == 'S')  parse_space_t( next_arg (i, argc, argv) );
                 else if (  arg[1] == 'l')  parse_local_t( next_arg (i, argc, argv) );
@@ -250,6 +256,12 @@ const char help_msg[] =
         if ( !reference ) {
             parse_reference ( DEFAULT_REFERENCE );
         }
+
+        // If codon data type is requested and no genetic code was supplied,
+        // default to the universal genetic code.
+        if (data_type == codon && genetic_code == nullptr) {
+            parse_genetic_code (DEFAULT_GENETIC_CODE);
+        }
     }
 
     /**
@@ -268,6 +280,10 @@ const char help_msg[] =
         
         if ( scores ) {
             delete scores;
+        }
+
+        if ( genetic_code ) {
+            delete genetic_code;
         }
         
         if (memory_ref) {
@@ -459,6 +475,65 @@ const char help_msg[] =
      */
     void args_t::parse_quiet() {
         quiet = true;
+    }
+
+    /**
+     * Parses the genetic code identifier from a command-line argument.
+     *
+     * @param str The genetic code identifier. Can be a code name (e.g., "universal") or file path.
+     */
+    void args_t::parse_genetic_code ( const char * str ) {
+        if ( str ) {
+            // Map some common identifiers to filenames, defaulting to the raw string.
+            if (!strcmp (str, "1") || !strcmp (str, "standard") || !strcmp (str, "Standard") || !strcmp (str, "Universal")) {
+                code_name = "universal";
+            } else {
+                bool numeric = true;
+                for (const char* p = str; *p; ++p) {
+                    if (!isdigit((unsigned char)*p)) { numeric = false; break; }
+                }
+                if (numeric) {
+                    // read mapping from a file in the genetic_codes resource directory
+                    const char * map_file = "ncbi-codon-map";
+                    std::ifstream map_stream = check_file_path_stream(map_file, GENETIC_CODES_SUBPATH);
+                    if (!map_stream.is_open()) {
+                        ERROR_NO_USAGE ("failed to open the genetic code mapping file %s", map_file);
+                    }
+                    std::string line;
+                    bool found = false;
+                    while (std::getline(map_stream, line)) {
+                        if (line.empty()) { continue; }
+                        size_t pos = 0; while (pos < line.size() && isspace((unsigned char)line[pos])) ++pos;
+                        if (pos >= line.size() || line[pos] == '#') { continue; }
+                        std::istringstream iss(line);
+                        std::string num, name;
+                        if (iss >> num >> name) {
+                            if (num == std::string(str)) { code_name = name; found = true; break; }
+                        }
+                    }
+                    if (!found) {
+                        ERROR_NO_USAGE ("unknown NCBI genetic code number %s", str);
+                    }
+                } else {
+                    code_name = str;
+                }
+            }
+
+            std::ifstream code_stream = check_file_path_stream(code_name.c_str(), GENETIC_CODES_SUBPATH);
+            if (!code_stream.is_open()) {
+                ERROR_NO_USAGE ("Unknown genetic code %s", code_name.c_str());
+            }
+
+            genetic_code = new ConfigParser(code_stream);
+        } else {
+            // If no genetic code is provided, use default (universal)
+            code_name = "universal";
+            std::ifstream code_stream = check_file_path_stream(code_name.c_str(), GENETIC_CODES_SUBPATH);
+            if (!code_stream.is_open()) {
+                ERROR_NO_USAGE ("failed to open the default genetic code file %s", code_name.c_str());
+            }
+            genetic_code = new ConfigParser(code_stream);
+        }
     }
 
 }
