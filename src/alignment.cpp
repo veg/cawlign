@@ -404,7 +404,7 @@ long CodonAlignStringsStep( cawlign_fp * const score_matrix
             } else {
                 choices[ HY_111_111 ] = score_matrix[ prev - 3 ] + cost_matrix[ r_codon * cost_stride + cost_stride - 1 ];
             }
-            q_codon = cost_stride - 1;
+            //q_codon = cost_stride - 1;
         } else {
             
             if (q_codon >= 0) {

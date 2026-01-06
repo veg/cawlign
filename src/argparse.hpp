@@ -24,7 +24,7 @@
 #endif
 
 #ifndef LIBRARY_PATH
-    #define LIBRARY_PATH            "/usr/local/shares/cawlign/"
+    #define LIBRARY_PATH            "/usr/local/share/cawlign/"
 #endif
 
 #define SCORES_SUBPATH        "scoring"
