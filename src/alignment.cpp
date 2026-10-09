@@ -44,7 +44,7 @@
 #include <algorithm>
 #include <mutex>
 
-#if defined(__ARM_NEON__)
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
 #include <arm_neon.h>
 #endif
 
@@ -56,8 +56,8 @@
 #define MAX_OP(a, b) ( (( a ) > ( b )) ? ( a ) : ( b ) )
 
 struct RefKmerEntry {
-    int16_t pos1;
-    int16_t pos2;
+    int32_t pos1;
+    int32_t pos2;
 };
 
 static const int8_t kCharTo2Bit[256] = {
@@ -83,37 +83,44 @@ static std::mutex g_ref_kmer_mutex;
 static std::vector<RefKmerEntry> g_ref_kmer_table;
 static const char* g_cached_ref_ptr = nullptr;
 static unsigned long g_cached_ref_len = 0;
+static uint64_t g_cached_ref_checksum = 0;
 
 static void EnsureRefKmerTable(const char* r_str, unsigned long r_len) {
-    if (g_cached_ref_ptr != r_str || g_cached_ref_len != r_len) {
-        std::lock_guard<std::mutex> lock(g_ref_kmer_mutex);
-        if (g_cached_ref_ptr != r_str || g_cached_ref_len != r_len) {
-            if (g_ref_kmer_table.size() != (1 << 20)) {
-                g_ref_kmer_table.resize(1 << 20);
+    uint64_t checksum = r_len;
+    if (r_len > 0) {
+        checksum ^= (uint64_t)(unsigned char)r_str[0] << 8;
+        checksum ^= (uint64_t)(unsigned char)r_str[r_len - 1] << 16;
+        checksum ^= (uint64_t)(unsigned char)r_str[r_len / 2] << 24;
+    }
+    std::lock_guard<std::mutex> lock(g_ref_kmer_mutex);
+    if (g_cached_ref_ptr == r_str && g_cached_ref_len == r_len && g_cached_ref_checksum == checksum) {
+        return;
+    }
+    if (g_ref_kmer_table.size() != (1 << 20)) {
+        g_ref_kmer_table.resize(1 << 20);
+    }
+    std::fill(g_ref_kmer_table.begin(), g_ref_kmer_table.end(), RefKmerEntry{-1, -1});
+    if (r_len >= 10) {
+        for (long r = 0; r <= (long)r_len - 10; ++r) {
+            uint32_t key = 0;
+            bool ok = true;
+            for (int k = 0; k < 10; ++k) {
+                int8_t b = kCharTo2Bit[(unsigned char)r_str[r + k]];
+                if (b < 0) { ok = false; break; }
+                key = (key << 2) | b;
             }
-            std::fill(g_ref_kmer_table.begin(), g_ref_kmer_table.end(), RefKmerEntry{-1, -1});
-            if (r_len >= 10) {
-                for (long r = 0; r <= (long)r_len - 10; ++r) {
-                    uint32_t key = 0;
-                    bool ok = true;
-                    for (int k = 0; k < 10; ++k) {
-                        int8_t b = kCharTo2Bit[(unsigned char)r_str[r + k]];
-                        if (b < 0) { ok = false; break; }
-                        key = (key << 2) | b;
-                    }
-                    if (ok) {
-                        if (g_ref_kmer_table[key].pos1 < 0) {
-                            g_ref_kmer_table[key].pos1 = (int16_t)r;
-                        } else if (g_ref_kmer_table[key].pos2 < 0) {
-                            g_ref_kmer_table[key].pos2 = (int16_t)r;
-                        }
-                    }
+            if (ok) {
+                if (g_ref_kmer_table[key].pos1 < 0) {
+                    g_ref_kmer_table[key].pos1 = (int32_t)r;
+                } else if (g_ref_kmer_table[key].pos2 < 0) {
+                    g_ref_kmer_table[key].pos2 = (int32_t)r;
                 }
             }
-            g_cached_ref_ptr = r_str;
-            g_cached_ref_len = r_len;
         }
     }
+    g_cached_ref_ptr = r_str;
+    g_cached_ref_len = r_len;
+    g_cached_ref_checksum = checksum;
 }
 
 struct KmerHit {
@@ -160,15 +167,28 @@ static bool BuildCorridor(
         }
     }
 
+    if (raw_hits.empty()) return false;
+
+    int max_votes = 0;
+    int best_d = 0;
+    for (size_t d = 0; d < diag_votes.size(); ++d) {
+        if (diag_votes[d] > max_votes) {
+            max_votes = diag_votes[d];
+            best_d = (int)d - (int)diag_offset;
+        }
+    }
+    if (max_votes < 5) return false;
+
+    const long W_nt = W * 3;
     std::vector<KmerHit> filtered_hits;
     filtered_hits.reserve(raw_hits.size());
     for (const auto& h : raw_hits) {
-        if (diag_votes[h.d + diag_offset] >= 5) {
+        if (diag_votes[h.d + diag_offset] >= 5 && std::labs(h.d - best_d) <= W_nt) {
             filtered_hits.push_back(h);
         }
     }
 
-    if (filtered_hits.size() < 5) return false;
+    if (filtered_hits.size() < 10) return false;
 
     std::sort(filtered_hits.begin(), filtered_hits.end(), [](const KmerHit& a, const KmerHit& b) {
         return a.r < b.r || (a.r == b.r && a.q < b.q);
@@ -182,7 +202,7 @@ static bool BuildCorridor(
         }
     }
 
-    if (chain.size() < 5) return false;
+    if (chain.size() < 10) return false;
 
     std::vector<std::pair<long, long>> anchors;
     anchors.reserve(chain.size());
@@ -194,7 +214,27 @@ static bool BuildCorridor(
         }
     }
 
-    if (anchors.size() < 5) return false;
+    if (anchors.size() < 10) return false;
+
+    const long r_span = (anchors.back().first - anchors.front().first) * 3;
+    const long q_span = anchors.back().second - anchors.front().second;
+    const long min_len = (long)std::min(r_len, q_len);
+
+    if (r_span < 0.5 * min_len && q_span < 0.5 * min_len) return false;
+
+    const long lead_unanchored_r = anchors.front().first * 3;
+    const long trail_unanchored_r = (long)r_len - anchors.back().first * 3;
+    const long lead_unanchored_q = anchors.front().second;
+    const long trail_unanchored_q = (long)q_len - anchors.back().second;
+
+    if (lead_unanchored_r > 150 && lead_unanchored_q > 150) return false;
+    if (trail_unanchored_r > 150 && trail_unanchored_q > 150) return false;
+
+    for (size_t a = 0; a + 1 < anchors.size(); ++a) {
+        long gap_r = (anchors[a + 1].first - anchors[a].first) * 3;
+        long gap_q = anchors[a + 1].second - anchors[a].second;
+        if (gap_r > W_nt && gap_q > W_nt) return false;
+    }
 
     std::vector<long> j_star(score_rows);
     long i0 = anchors[0].first;
@@ -1542,7 +1582,8 @@ cawlign_fp AlignStrings( char const * r_str
                 static thread_local std::vector<uint8_t> tl_full_move_matrix;
 
                 std::vector<long> j_min, j_max;
-                bool do_band = (do_local && !do_true_local);
+                bool do_band = (do_local && !do_true_local && do_affine);
+                if (getenv("CAWLIGN_NO_BAND")) do_band = false;
                 if (do_band) {
                     do_band = BuildCorridor(q_str, q_len, r_len, score_rows, kBandWidth, j_min, j_max);
                 }
@@ -1700,7 +1741,7 @@ cawlign_fp AlignStrings( char const * r_str
 
                                 if (j >= 4) {
                                     const cawlign_fp min_p = (j == 4 || j == (long)score_cols - 1) ? 0.0f : miscall_cost;
-                                    if (sc_p[j - 4] + m4 - min_p > max_score) {
+                                    if ((sc_p[j - 4] - min_p) + m4 > max_score) {
                                         const cawlign_fp prev_sc = sc_p[j - 4];
                                         for (long k = 0; k < HY_3X4_COUNT; ++k) {
                                             const long c1 = q_enc[j - codon_spec_3x4[k][0]];
@@ -1724,7 +1765,7 @@ cawlign_fp AlignStrings( char const * r_str
 
                                 if (j >= 5) {
                                     const cawlign_fp min_p = (j == 5 || j == (long)score_cols - 1) ? 0.0f : miscall_cost;
-                                    if (sc_p[j - 5] + m5 - min_p > max_score) {
+                                    if ((sc_p[j - 5] - min_p) + m5 > max_score) {
                                         const cawlign_fp prev_sc = sc_p[j - 5];
                                         for (long k = 0; k < HY_3X5_COUNT; ++k) {
                                             const long c1 = q_enc[j - codon_spec_3x5[k][0]];
@@ -1810,9 +1851,13 @@ cawlign_fp AlignStrings( char const * r_str
                                     best_choice = HY_000_111;
                                 }
 
-                                const cawlign_fp max_p = MAX_OP(MAX_OP(sc_p[j - 1], sc_p[j - 2]), MAX_OP(sc_p[j - 4], sc_p[j - 5]));
-                                if (__builtin_expect(max_p + max_b > max_score, 0)) {
-                                    if (sc_p[j - 1] + b1 > max_score) {
+                                const cawlign_fp bound1 = (sc_p[j - 1] - pen_2x) + m1;
+                                const cawlign_fp bound2 = (sc_p[j - 2] - miscall_cost) + m2;
+                                const cawlign_fp bound4 = (sc_p[j - 4] - miscall_cost) + m4;
+                                const cawlign_fp bound5 = (sc_p[j - 5] - pen_2x) + m5;
+                                const cawlign_fp max_bound = MAX_OP(MAX_OP(bound1, bound2), MAX_OP(bound4, bound5));
+                                if (__builtin_expect(max_bound > max_score, 0)) {
+                                    if (bound1 > max_score) {
                                         const long p0 = q_enc[j - 1];
                                         if (p0 >= 0) {
                                             const cawlign_fp base_sc = sc_p[j - 1] - pen_2x;
@@ -1826,7 +1871,7 @@ cawlign_fp AlignStrings( char const * r_str
                                         }
                                     }
 
-                                    if (sc_p[j - 2] + b2 > max_score) {
+                                    if (bound2 > max_score) {
                                         const long p0 = q_enc[j - 2] * char_count + q_enc[j - 1];
                                         if (p0 >= 0) {
                                             const cawlign_fp base_sc = sc_p[j - 2] - miscall_cost;
@@ -1840,7 +1885,7 @@ cawlign_fp AlignStrings( char const * r_str
                                         }
                                     }
 
-                                    if (sc_p[j - 4] + b4 > max_score) {
+                                    if (bound4 > max_score) {
                                         const cawlign_fp base_sc = sc_p[j - 4] - miscall_cost;
                                         for (long k = 0; k < HY_3X4_COUNT; ++k) {
                                             const long c1 = q_enc[j - codon_spec_3x4[k][0]];
@@ -1857,7 +1902,7 @@ cawlign_fp AlignStrings( char const * r_str
                                         }
                                     }
 
-                                    if (sc_p[j - 5] + b5 > max_score) {
+                                    if (bound5 > max_score) {
                                         const cawlign_fp base_sc = sc_p[j - 5] - pen_2x;
                                         for (long k = 0; k < HY_3X5_COUNT; ++k) {
                                             const long c1 = q_enc[j - codon_spec_3x5[k][0]];
@@ -1924,15 +1969,26 @@ cawlign_fp AlignStrings( char const * r_str
                     for (long k = index_Q; k < (long)q_len; ++k) edit_ops[edit_ptr++] = 1;
 
                     bool corridor_escaped = false;
-                    while (index_R && index_Q && (index_R >= 3 || index_Q >= 3) && !took_local_shortcut) {
+                    long term_row = index_R / 3;
+                    if (term_row < 0 || term_row >= (long)score_rows || index_Q < j_min[term_row] || index_Q > j_max[term_row]) {
+                        corridor_escaped = true;
+                    } else {
+                        if (index_Q <= j_min[term_row] + 2 && term_row > 2) corridor_escaped = true;
+                        if (index_Q >= j_max[term_row] - 2 && term_row + 3 < (long)score_rows) corridor_escaped = true;
+                    }
+
+                    while (index_R && index_Q && (index_R >= 3 || index_Q >= 3) && !took_local_shortcut && !corridor_escaped) {
                         long cur_row = index_R / 3;
-                        if ((j_min[cur_row] > 0 && index_Q <= j_min[cur_row] + 2) ||
-                            (j_max[cur_row] < (long)q_len && index_Q >= j_max[cur_row] - 2)) {
+                        if (cur_row < 0 || cur_row >= (long)score_rows || index_Q < j_min[cur_row] || index_Q > j_max[cur_row]) {
                             corridor_escaped = true;
                             break;
                         }
 
-                        if (index_Q < j_min[cur_row] || index_Q > j_max[cur_row]) {
+                        if (index_Q <= j_min[cur_row] + 2 && cur_row > 2) {
+                            corridor_escaped = true;
+                            break;
+                        }
+                        if (index_Q >= j_max[cur_row] - 2 && cur_row + 3 < (long)score_rows) {
                             corridor_escaped = true;
                             break;
                         }
@@ -1950,7 +2006,7 @@ cawlign_fp AlignStrings( char const * r_str
                         if (code == HY_111_000) {
                             while (index_R >= 3) {
                                 long r_row = index_R / 3;
-                                if (index_Q < j_min[r_row] || index_Q > j_max[r_row]) {
+                                if (r_row < 0 || r_row >= (long)score_rows || index_Q < j_min[r_row] || index_Q > j_max[r_row]) {
                                     corridor_escaped = true;
                                     break;
                                 }
@@ -1964,7 +2020,7 @@ cawlign_fp AlignStrings( char const * r_str
                         } else if (code == HY_000_111) {
                             long r_row = index_R / 3;
                             while (index_Q >= 3) {
-                                if (index_Q < j_min[r_row] || index_Q > j_max[r_row]) {
+                                if (r_row < 0 || r_row >= (long)score_rows || index_Q < j_min[r_row] || index_Q > j_max[r_row]) {
                                     corridor_escaped = true;
                                     break;
                                 }
@@ -1978,6 +2034,17 @@ cawlign_fp AlignStrings( char const * r_str
                         }
 
                         if (corridor_escaped) break;
+                    }
+
+                    if (!corridor_escaped) {
+                        long aligned_matches = 0;
+                        for (long k = 0; k < edit_ptr; ++k) {
+                            if (edit_ops[k] == 0) aligned_matches++;
+                        }
+                        long min_len = (long)std::min(r_len, q_len);
+                        if (aligned_matches < 0.5 * min_len || score <= 0.0f) {
+                            corridor_escaped = true;
+                        }
                     }
 
                     if (!corridor_escaped) {
@@ -2340,10 +2407,14 @@ cawlign_fp AlignStrings( char const * r_str
                                 best_choice = HY_000_111;
                             }
 
-                            const cawlign_fp max_p = MAX_OP(MAX_OP(sc_p[j - 1], sc_p[j - 2]), MAX_OP(sc_p[j - 4], sc_p[j - 5]));
-                            if (__builtin_expect(max_p + max_b > max_score, 0)) {
+                            const cawlign_fp bound1 = (sc_p[j - 1] - pen_2x) + m1;
+                            const cawlign_fp bound2 = (sc_p[j - 2] - miscall_cost) + m2;
+                            const cawlign_fp bound4 = (sc_p[j - 4] - miscall_cost) + m4;
+                            const cawlign_fp bound5 = (sc_p[j - 5] - pen_2x) + m5;
+                            const cawlign_fp max_bound = MAX_OP(MAX_OP(bound1, bound2), MAX_OP(bound4, bound5));
+                            if (__builtin_expect(max_bound > max_score, 0)) {
                                 // 3x1
-                                if (sc_p[j - 1] + b1 > max_score) {
+                                if (bound1 > max_score) {
                                     const long p0 = q_enc[j - 1];
                                     if (p0 >= 0) {
                                         const cawlign_fp base_sc = sc_p[j - 1] - pen_2x;
@@ -2358,7 +2429,7 @@ cawlign_fp AlignStrings( char const * r_str
                                 }
 
                                 // 3x2
-                                if (sc_p[j - 2] + b2 > max_score) {
+                                if (bound2 > max_score) {
                                     const long p0 = q_enc[j - 2] * char_count + q_enc[j - 1];
                                     if (p0 >= 0) {
                                         const cawlign_fp base_sc = sc_p[j - 2] - miscall_cost;
@@ -2373,7 +2444,7 @@ cawlign_fp AlignStrings( char const * r_str
                                 }
 
                                 // 3x4
-                                if (sc_p[j - 4] + b4 > max_score) {
+                                if (bound4 > max_score) {
                                     const cawlign_fp base_sc = sc_p[j - 4] - miscall_cost;
                                     for (long k = 0; k < HY_3X4_COUNT; ++k) {
                                         const long c1 = q_enc[j - codon_spec_3x4[k][0]];
@@ -2391,7 +2462,7 @@ cawlign_fp AlignStrings( char const * r_str
                                 }
 
                                 // 3x5
-                                if (sc_p[j - 5] + b5 > max_score) {
+                                if (bound5 > max_score) {
                                     const cawlign_fp base_sc = sc_p[j - 5] - pen_2x;
                                     for (long k = 0; k < HY_3X5_COUNT; ++k) {
                                         const long c1 = q_enc[j - codon_spec_3x5[k][0]];

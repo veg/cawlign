@@ -666,13 +666,25 @@ int readFASTA (FILE* F, char& automatonState,  StringBuffer &names,
  */
 int reverseComplement (StringBuffer& sequence, unsigned long from, unsigned long to) {
     
-    for (unsigned long i = from, j = to; i <= j; i++, j--) {
-        char leading_char  = reverseComplementCharacters[sequence.getChar(i)],
-             trailing_char = reverseComplementCharacters[sequence.getChar(j)];
-    
+    if (from > to) return 0;
+    unsigned long i = from, j = to;
+    while (i < j) {
+        char leading_char  = reverseComplementCharacters[(unsigned char)sequence.getChar(i)],
+             trailing_char = reverseComplementCharacters[(unsigned char)sequence.getChar(j)];
+
         if (leading_char > 0 && trailing_char > 0) {
             sequence.setChar (i, trailing_char);
             sequence.setChar (j, leading_char);
+        } else {
+            return 1;
+        }
+        i++;
+        j--;
+    }
+    if (i == j) {
+        char c = reverseComplementCharacters[(unsigned char)sequence.getChar(i)];
+        if (c > 0) {
+            sequence.setChar (i, c);
         } else {
             return 1;
         }

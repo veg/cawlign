@@ -409,7 +409,7 @@ CawalignCodonScores::CawalignCodonScores (ConfigParser * code_settings, ConfigPa
         }
     };
     
-    pad_vector (s3x1, 10);
+    pad_vector (s3x1, 12);
     pad_vector (s3x2, 48);
     pad_vector (s3x4, 256);
     pad_vector (s3x5, 640);

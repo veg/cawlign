@@ -129,9 +129,9 @@ add_test(NAME nuc_linear COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_D
 add_test(NAME nuc_local COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_local.fa $<TARGET_FILE:cawlign> -l local -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
 add_test(NAME nuc_custom_scoring COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_custom_scoring.fa $<TARGET_FILE:cawlign> -s ${RES_DIR}/scoring/NUC4.4 -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
 
-add_test(NAME prot_default COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/prot_default.fa $<TARGET_FILE:cawlign> -t protein -r ${RES_DIR}/references/HXB2_pr -s ${CMAKE_SOURCE_DIR}/test/prot.scoring -q ${CASES_DIR}/OQ948666-pr.fa)
+add_test(NAME prot_default COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/prot_default.fa $<TARGET_FILE:cawlign> -t protein -r ${RES_DIR}/references/HXB2_pr -s ${RES_DIR}/scoring/BLOSUM62_prot -q ${CASES_DIR}/OQ948666-pr.fa)
 
-add_test(NAME codon_default COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_default.fa $<TARGET_FILE:cawlign> -t codon -r ${RES_DIR}/references/HXB2_pr -s ${RES_DIR}/scoring/BLOSUM62 -q ${CASES_DIR}/OQ948666-pr.fa)
+add_test(NAME codon_default COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_default.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_pr -s ${RES_DIR}/scoring/BLOSUM62 -q ${CASES_DIR}/OQ948666-pr.fa)
 add_test(NAME codon_mtdna COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_mtdna.fa $<TARGET_FILE:cawlign> -t codon -c vertebrate-mtdna -r ${RES_DIR}/references/COXI-mouse -s ${RES_DIR}/scoring/BLOSUM62 -q ${CASES_DIR}/R_norvegicus_COXI.fa)
 
 add_test(NAME nuc_rc COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_rc.fa $<TARGET_FILE:cawlign> -R annotated -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-rc.fa)
@@ -154,26 +154,23 @@ add_test(NAME negative_invalid_genetic_code COMMAND ${TEST_PYTHON_EXE} ${TEST_RU
 add_test(NAME negative_protein_rc COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "Reverse complement options other than 'none' are not compatible with the protein data type" dummy.fa $<TARGET_FILE:cawlign> -t protein -R annotated -q ${CASES_DIR}/OQ948666-pr.fa)
 
 # Codon Mode - Reference length not divisible by 3
-add_test(NAME negative_codon_div3 COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "The reference sequence must have length divisible by 3" dummy.fa $<TARGET_FILE:cawlign> -t codon -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/div3_fail.fa -q ${CASES_DIR}/OQ948666-pr.fa)
+add_test(NAME negative_codon_div3 COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "The reference sequence must have length divisible by 3" dummy.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/div3_fail.fa -q ${CASES_DIR}/OQ948666-pr.fa)
 
 # Codon Mode - Stop codon in reference
-add_test(NAME negative_codon_stop_ref COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "The reference sequence must not have stop codons in it" dummy.fa $<TARGET_FILE:cawlign> -t codon -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/stop_ref.fa -q ${CASES_DIR}/OQ948666-pr.fa)
+add_test(NAME negative_codon_stop_ref COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "The reference sequence must not have stop codons in it" dummy.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/stop_ref.fa -q ${CASES_DIR}/OQ948666-pr.fa)
 
-# Edge Case - Empty input file (should handle gracefully or error out clearly)
-add_test(NAME edge_empty_input COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${CMAKE_SOURCE_DIR}/test/edge_cases/empty.fa $<TARGET_FILE:cawlign> -q ${CMAKE_SOURCE_DIR}/test/edge_cases/empty.fa)
+# Edge Case - Empty input file (should handle gracefully)
+add_test(NAME edge_empty_input COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --allow-empty ${CMAKE_SOURCE_DIR}/test/edge_cases/empty.fa $<TARGET_FILE:cawlign> -q ${CMAKE_SOURCE_DIR}/test/edge_cases/empty.fa)
 
 # Edge Case - Very short sequence
-# Generate a baseline for the short sequence test
-add_test(NAME edge_short_seq_gen COMMAND $<TARGET_FILE:cawlign> -r ${RES_DIR}/references/HXB2_pol -o ${BASELINES_DIR}/short_seq.fa -q ${CMAKE_SOURCE_DIR}/test/edge_cases/short_qry.fa)
 add_test(NAME edge_short_seq COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/short_seq.fa $<TARGET_FILE:cawlign> -r ${RES_DIR}/references/HXB2_pol -q ${CMAKE_SOURCE_DIR}/test/edge_cases/short_qry.fa)
-set_tests_properties(edge_short_seq PROPERTIES DEPENDS edge_short_seq_gen)
 
 #-------------------------------------------------------------------------------
 # Advanced Coverage Tests
 #-------------------------------------------------------------------------------
 
 # Codon Slippage (24-move state machine stress test)
-add_test(NAME codon_slippage COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_slippage.fa $<TARGET_FILE:cawlign> -t codon -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/int-slippage.fa)
+add_test(NAME codon_slippage COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_slippage.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/int-slippage.fa)
 
 # Non-Affine Scoring (-a)
 add_test(NAME nuc_non_affine COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_non_affine.fa $<TARGET_FILE:cawlign> -a -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
@@ -182,24 +179,28 @@ add_test(NAME nuc_non_affine COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELIN
 add_test(NAME nuc_ambig COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_ambig.fa $<TARGET_FILE:cawlign> -r ${CMAKE_SOURCE_DIR}/test/edge_cases/ambig_nuc.fa -q ${CMAKE_SOURCE_DIR}/test/edge_cases/ambig_nuc.fa)
 
 # Codon Quiet Mode stderr Suppression Check (verify that -q produces no stderr output)
-add_test(NAME nuc_quiet COMMAND $<TARGET_FILE:cawlign> -q -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
+add_test(NAME nuc_quiet COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --check-empty-stderr ${BASELINES_DIR}/nuc_default.fa $<TARGET_FILE:cawlign> -q -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
 
 #-------------------------------------------------------------------------------
 # Complex Codon Frameshift Tests (State Machine Coverage)
 #-------------------------------------------------------------------------------
 
 # +1 Insertion in query
-add_test(NAME codon_fs_plus_1 COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_fs_plus_1.fa $<TARGET_FILE:cawlign> -t codon -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_ref.fa -q ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_plus_1.fa)
+add_test(NAME codon_fs_plus_1 COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_fs_plus_1.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_ref.fa -q ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_plus_1.fa)
 
 # -1 Deletion in query
-add_test(NAME codon_fs_minus_1 COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_fs_minus_1.fa $<TARGET_FILE:cawlign> -t codon -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_ref.fa -q ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_minus_1.fa)
+add_test(NAME codon_fs_minus_1 COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_fs_minus_1.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_ref.fa -q ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_minus_1.fa)
 
 # +4 Insertion in query (Large transition)
-add_test(NAME codon_fs_plus_4 COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_fs_plus_4.fa $<TARGET_FILE:cawlign> -t codon -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_ref.fa -q ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_plus_4.fa)
+add_test(NAME codon_fs_plus_4 COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_fs_plus_4.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_ref.fa -q ${CMAKE_SOURCE_DIR}/test/edge_cases/codon_fs_plus_4.fa)
 
 # Pathological State Machine Stress Tests (109 edge cases against HXB2_pr and HXB2_pol)
-add_test(NAME codon_pathological_pr COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/pathological_cases.fa $<TARGET_FILE:cawlign> -t codon -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pr -q ${CMAKE_SOURCE_DIR}/test/pathological/pathological_cases.fa)
-add_test(NAME codon_pathological_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/pathological_cases_pol.fa $<TARGET_FILE:cawlign> -t codon -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pol -q ${CMAKE_SOURCE_DIR}/test/pathological/pathological_cases.fa)
+add_test(NAME codon_pathological_pr COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/pathological_cases.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pr -q ${CMAKE_SOURCE_DIR}/test/pathological/pathological_cases.fa)
+add_test(NAME codon_pathological_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/pathological_cases_pol.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pol -q ${CMAKE_SOURCE_DIR}/test/pathological/pathological_cases.fa)
+
+# Regression tests for sparse/divergent corridor fallback
+add_test(NAME codon_kx988404_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_kx988404_pol.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_pol ${CASES_DIR}/KX988404_codon.fa)
+add_test(NAME codon_kf576595_rt COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_kf576595_rt.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_rt ${CASES_DIR}/KF576595_rt.fa)
 
 
 #-------------------------------------------------------------------------------
