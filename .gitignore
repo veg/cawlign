@@ -11,3 +11,37 @@ CTestTestfile.cmake
 _deps
 cawlign
 docs/latex
+
+# Build and scratch artifacts
+build/
+Release/
+scratch
+*.xcodeproj
+*.a
+*.gcov
+profile.json
+cawlign_prof
+
+# Code coverage
+*.gcda
+*.gcno
+coverage.info
+coverage.filtered.info
+coverage_report/
+
+# OS artifacts
+.DS_Store
+*/.DS_Store
+*/*/.DS_Store
+
+# Local test data artifacts
+test.fa
+test.fas
+test/errors.log
+test/out.fa
+test/network.json
+test/sequence.bam
+test/tn93.csv
+test/LANL-B-POL.*
+test/D-ambig.fas
+test/prot.scoring

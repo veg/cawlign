@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <climits>
+#include <cstdint>
 #include "stringBuffer.h"
 
 using namespace std;
@@ -275,6 +276,6 @@ extern Vector       nameLengths,
 
 extern VectorFP distanceEstimates;
 extern const  double  resolutionsCount [];
-extern char validFlags[];
+extern int8_t validFlags[];
 
 #endif

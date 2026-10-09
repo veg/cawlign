@@ -162,8 +162,10 @@ const char help_msg[] =
         ifstream test;
         test.open (path);
         if (!test.is_open()) {
+            const char* env_path = getenv("CAWLIGN_LIBRARY_PATH");
+            const char* base_path = (env_path && env_path[0]) ? env_path : LIBRARY_PATH;
             StringBuffer sb;
-            sb.appendBuffer (LIBRARY_PATH);
+            sb.appendBuffer (base_path);
             if (sb.getString()[sb.length()-1] != '/') {
                 sb.appendChar('/');
             }
