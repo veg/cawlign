@@ -80,26 +80,26 @@ static const int8_t kCharTo2Bit[256] = {
 };
 
 static std::mutex g_ref_kmer_mutex;
-static std::vector<RefKmerEntry> g_ref_kmer_table;
-static const char* g_cached_ref_ptr = nullptr;
+static std::shared_ptr<const std::vector<RefKmerEntry>> g_cached_ref_table;
 static unsigned long g_cached_ref_len = 0;
-static uint64_t g_cached_ref_checksum = 0;
+static uint64_t g_cached_ref_hash = 0;
 
-static void EnsureRefKmerTable(const char* r_str, unsigned long r_len) {
-    uint64_t checksum = r_len;
-    if (r_len > 0) {
-        checksum ^= (uint64_t)(unsigned char)r_str[0] << 8;
-        checksum ^= (uint64_t)(unsigned char)r_str[r_len - 1] << 16;
-        checksum ^= (uint64_t)(unsigned char)r_str[r_len / 2] << 24;
+static uint64_t ComputeStringHash64(const char* str, unsigned long len) {
+    uint64_t hash = 14695981039346656037ULL;
+    for (unsigned long i = 0; i < len; ++i) {
+        hash ^= (uint64_t)(unsigned char)str[i];
+        hash *= 1099511628211ULL;
     }
+    return hash;
+}
+
+static std::shared_ptr<const std::vector<RefKmerEntry>> GetRefKmerTable(const char* r_str, unsigned long r_len) {
+    uint64_t hash = ComputeStringHash64(r_str, r_len);
     std::lock_guard<std::mutex> lock(g_ref_kmer_mutex);
-    if (g_cached_ref_ptr == r_str && g_cached_ref_len == r_len && g_cached_ref_checksum == checksum) {
-        return;
+    if (g_cached_ref_table && g_cached_ref_len == r_len && g_cached_ref_hash == hash) {
+        return g_cached_ref_table;
     }
-    if (g_ref_kmer_table.size() != (1 << 20)) {
-        g_ref_kmer_table.resize(1 << 20);
-    }
-    std::fill(g_ref_kmer_table.begin(), g_ref_kmer_table.end(), RefKmerEntry{-1, -1});
+    auto table = std::make_shared<std::vector<RefKmerEntry>>(1 << 20, RefKmerEntry{-1, -1});
     if (r_len >= 10) {
         for (long r = 0; r <= (long)r_len - 10; ++r) {
             uint32_t key = 0;
@@ -110,17 +110,23 @@ static void EnsureRefKmerTable(const char* r_str, unsigned long r_len) {
                 key = (key << 2) | b;
             }
             if (ok) {
-                if (g_ref_kmer_table[key].pos1 < 0) {
-                    g_ref_kmer_table[key].pos1 = (int32_t)r;
-                } else if (g_ref_kmer_table[key].pos2 < 0) {
-                    g_ref_kmer_table[key].pos2 = (int32_t)r;
+                if ((*table)[key].pos1 < 0) {
+                    (*table)[key].pos1 = (int32_t)r;
+                } else if ((*table)[key].pos2 < 0) {
+                    (*table)[key].pos2 = (int32_t)r;
                 }
             }
         }
     }
-    g_cached_ref_ptr = r_str;
+    g_cached_ref_table = table;
     g_cached_ref_len = r_len;
-    g_cached_ref_checksum = checksum;
+    g_cached_ref_hash = hash;
+    return table;
+}
+
+static bool is_band_disabled() {
+    static const bool disabled = (getenv("CAWLIGN_NO_BAND") != nullptr);
+    return disabled;
 }
 
 struct KmerHit {
@@ -133,6 +139,7 @@ static bool BuildCorridor(
     const char* q_str, unsigned long q_len,
     unsigned long r_len, unsigned long score_rows,
     long W,
+    const std::vector<RefKmerEntry>& ref_kmer_table,
     std::vector<long>& j_min,
     std::vector<long>& j_max
 ) {
@@ -154,7 +161,7 @@ static bool BuildCorridor(
             key = (key << 2) | b;
         }
         if (!ok) continue;
-        RefKmerEntry e = g_ref_kmer_table[key];
+        RefKmerEntry e = ref_kmer_table[key];
         if (e.pos1 >= 0) {
             int d1 = (int)q - e.pos1;
             raw_hits.push_back({e.pos1, (int32_t)q, d1});
@@ -179,7 +186,7 @@ static bool BuildCorridor(
     }
     if (max_votes < 5) return false;
 
-    const long W_nt = W * 3;
+    const long W_nt = W;
     std::vector<KmerHit> filtered_hits;
     filtered_hits.reserve(raw_hits.size());
     for (const auto& h : raw_hits) {
@@ -227,13 +234,17 @@ static bool BuildCorridor(
     const long lead_unanchored_q = anchors.front().second;
     const long trail_unanchored_q = (long)q_len - anchors.back().second;
 
+    if (lead_unanchored_q - lead_unanchored_r > W) return false;
+    if (trail_unanchored_q - trail_unanchored_r > W) return false;
+
     if (lead_unanchored_r > 150 && lead_unanchored_q > 150) return false;
     if (trail_unanchored_r > 150 && trail_unanchored_q > 150) return false;
 
     for (size_t a = 0; a + 1 < anchors.size(); ++a) {
         long gap_r = (anchors[a + 1].first - anchors[a].first) * 3;
         long gap_q = anchors[a + 1].second - anchors[a].second;
-        if (gap_r > W_nt && gap_q > W_nt) return false;
+        long gap_diag = std::labs(gap_q - gap_r);
+        if (gap_diag > W || (gap_r > 300 && gap_q > 300)) return false;
     }
 
     std::vector<long> j_star(score_rows);
@@ -1571,7 +1582,7 @@ cawlign_fp AlignStrings( char const * r_str
                     }
                 }
 
-                EnsureRefKmerTable(r_str, r_len);
+                auto ref_kmer_table_ptr = GetRefKmerTable(r_str, r_len);
 
                 constexpr long kBandWidth = 120;
                 constexpr int kBandShift = 8;
@@ -1583,9 +1594,9 @@ cawlign_fp AlignStrings( char const * r_str
 
                 std::vector<long> j_min, j_max;
                 bool do_band = (do_local && !do_true_local && do_affine);
-                if (getenv("CAWLIGN_NO_BAND")) do_band = false;
+                if (is_band_disabled()) do_band = false;
                 if (do_band) {
-                    do_band = BuildCorridor(q_str, q_len, r_len, score_rows, kBandWidth, j_min, j_max);
+                    do_band = BuildCorridor(q_str, q_len, r_len, score_rows, kBandWidth, *ref_kmer_table_ptr, j_min, j_max);
                 }
 
                 bool banded_done = false;
@@ -1973,8 +1984,8 @@ cawlign_fp AlignStrings( char const * r_str
                     if (term_row < 0 || term_row >= (long)score_rows || index_Q < j_min[term_row] || index_Q > j_max[term_row]) {
                         corridor_escaped = true;
                     } else {
-                        if (index_Q <= j_min[term_row] + 2 && term_row > 2) corridor_escaped = true;
-                        if (index_Q >= j_max[term_row] - 2 && term_row + 3 < (long)score_rows) corridor_escaped = true;
+                        if (index_Q <= j_min[term_row] + 2 && j_min[term_row] > 0 && term_row > 2) corridor_escaped = true;
+                        if (index_Q >= j_max[term_row] - 2 && j_max[term_row] < (long)q_len && term_row + 3 < (long)score_rows) corridor_escaped = true;
                     }
 
                     while (index_R && index_Q && (index_R >= 3 || index_Q >= 3) && !took_local_shortcut && !corridor_escaped) {
@@ -1984,11 +1995,11 @@ cawlign_fp AlignStrings( char const * r_str
                             break;
                         }
 
-                        if (index_Q <= j_min[cur_row] + 2 && cur_row > 2) {
+                        if (index_Q <= j_min[cur_row] + 2 && j_min[cur_row] > 0 && cur_row > 2) {
                             corridor_escaped = true;
                             break;
                         }
-                        if (index_Q >= j_max[cur_row] - 2 && cur_row + 3 < (long)score_rows) {
+                        if (index_Q >= j_max[cur_row] - 2 && j_max[cur_row] < (long)q_len && cur_row + 3 < (long)score_rows) {
                             corridor_escaped = true;
                             break;
                         }

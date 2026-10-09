@@ -133,7 +133,7 @@ add_test(NAME nuc_custom_scoring COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BAS
 add_test(NAME prot_default COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/prot_default.fa $<TARGET_FILE:cawlign> -t protein -r ${RES_DIR}/references/HXB2_pr -s ${RES_DIR}/scoring/BLOSUM62_prot -q ${CASES_DIR}/OQ948666-pr.fa)
 
 add_test(NAME codon_default COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_default.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_pr -s ${RES_DIR}/scoring/BLOSUM62 -q ${CASES_DIR}/OQ948666-pr.fa)
-add_test(NAME codon_mtdna COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_mtdna.fa $<TARGET_FILE:cawlign> -t codon -c vertebrate-mtdna -r ${RES_DIR}/references/COXI-mouse -s ${RES_DIR}/scoring/BLOSUM62 -q ${CASES_DIR}/R_norvegicus_COXI.fa)
+add_test(NAME codon_mtdna COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_mtdna.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/vertebrate-mtdna -r ${RES_DIR}/references/COXI-mouse -s ${RES_DIR}/scoring/BLOSUM62 -q ${CASES_DIR}/R_norvegicus_COXI.fa)
 
 add_test(NAME nuc_rc COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_rc.fa $<TARGET_FILE:cawlign> -R annotated -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-rc.fa)
 
@@ -150,6 +150,7 @@ add_test(NAME negative_invalid_datatype COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER
 
 # Invalid Genetic Code
 add_test(NAME negative_invalid_genetic_code COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "unknown NCBI genetic code number 999" dummy.fa $<TARGET_FILE:cawlign> -t codon -c 999 -q ${CASES_DIR}/OQ948666-pr.fa)
+set_tests_properties(negative_invalid_genetic_code PROPERTIES ENVIRONMENT "CAWLIGN_LIBRARY_PATH=${RES_DIR}")
 
 # Incompatible Options (Protein + RC)
 add_test(NAME negative_protein_rc COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "Reverse complement options other than 'none' are not compatible with the protein data type" dummy.fa $<TARGET_FILE:cawlign> -t protein -R annotated -q ${CASES_DIR}/OQ948666-pr.fa)
@@ -202,6 +203,8 @@ add_test(NAME codon_pathological_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} $
 # Regression tests for sparse/divergent corridor fallback
 add_test(NAME codon_kx988404_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_kx988404_pol.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_pol ${CASES_DIR}/KX988404_codon.fa)
 add_test(NAME codon_kf576595_rt COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_kf576595_rt.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_rt ${CASES_DIR}/KF576595_rt.fa)
+add_test(NAME codon_ins123_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_ins123_pol.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_pol ${CASES_DIR}/ins123_pol.fa)
+add_test(NAME codon_margin400_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_margin400_pol.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_pol ${CASES_DIR}/margin400_pol.fa)
 
 
 #-------------------------------------------------------------------------------

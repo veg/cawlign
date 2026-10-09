@@ -34,6 +34,8 @@ def compare_fasta(file1, file2, allow_empty=False):
 
     if len(seqs1) == 0 and len(seqs2) == 0:
         if allow_empty:
+            if os.path.getsize(file1) != os.path.getsize(file2):
+                return False, f"Expected empty output matching baseline ({os.path.getsize(file1)} bytes), got {os.path.getsize(file2)} bytes"
             return True, "Match (both empty)"
         return False, "Both input files are empty!"
 

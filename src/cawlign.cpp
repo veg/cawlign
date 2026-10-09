@@ -182,7 +182,7 @@ int main (int argc, const char * argv[]) {
                                          args.out_format != refmap
                                          );
                     
-                    if (args.reverse_complement != none) {
+                    if (args.reverse_complement != none && sequenceLength > 0) {
                         reverseComplement(sequences, 0, sequenceLength-1);
                         char * alignedRefSeqRC = nullptr,
                              * alignedQrySeqRC = nullptr;

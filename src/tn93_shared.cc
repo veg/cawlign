@@ -159,7 +159,7 @@ const  double   resolutionsCount_AA[] = {
 };
 
 
-char validFlags [256];
+int8_t validFlags [256];
 
   //---------------------------------------------------------------
 
@@ -666,7 +666,7 @@ int readFASTA (FILE* F, char& automatonState,  StringBuffer &names,
  */
 int reverseComplement (StringBuffer& sequence, unsigned long from, unsigned long to) {
     
-    if (from > to) return 0;
+    if (sequence.length() == 0 || from > to || to >= (unsigned long)sequence.length()) return 0;
     unsigned long i = from, j = to;
     while (i < j) {
         char leading_char  = reverseComplementCharacters[(unsigned char)sequence.getChar(i)],
