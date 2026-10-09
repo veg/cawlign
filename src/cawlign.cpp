@@ -108,11 +108,7 @@ int main (int argc, const char * argv[]) {
     automatonState = 0;
     fasta_result   = 2;
     
-    VectorFP   scoreCache,
-               insertCache,
-               deleteCache;
-    
-    #pragma omp parallel shared (automatonState, fasta_result, sequences_read, sequences_written, args, refName, refSequence, alignmentScoring) private (nameLengths, seqLengths, names, sequences, scoreCache,insertCache,deleteCache)
+    #pragma omp parallel shared (automatonState, fasta_result, sequences_read, sequences_written, args, refName, refSequence, alignmentScoring) private (nameLengths, seqLengths, names, sequences)
     while (fasta_result == 2) {
         
         StringBuffer names,
@@ -414,13 +410,6 @@ int main (int argc, const char * argv[]) {
  
                 CawalignCodonScores* codonScoring = ( CawalignCodonScores*)alignmentScoring;
                 
-                long score_size = (referenceSequenceLength / 3 + 1) * (sequenceLength + 1);
-                scoreCache.storeValue(0.,score_size-1);
-                if (args.affine) {
-                    insertCache.storeValue(0.,score_size-1);
-                    deleteCache.storeValue(0.,score_size-1);
-                }
-                
                 cawlign_fp forward_score = AlignStrings(
                                      refSequence.getString(),
                                      sequences.getString(),
@@ -447,9 +436,9 @@ int main (int argc, const char * argv[]) {
                                      codonScoring->s3x1.values(),
                                      args.local_option == local,
                                      args.out_format != refmap,
-                                     scoreCache.rvalues(),
-                                     insertCache.rvalues(),
-                                     deleteCache.rvalues(),
+                                     nullptr,
+                                     nullptr,
+                                     nullptr,
                                      codonScoring->resolutions.rvalues ()
                                      );
                 
@@ -457,12 +446,6 @@ int main (int argc, const char * argv[]) {
                     reverseComplement(sequences, 0, sequenceLength-1);
                     char * alignedRefSeqRC = nullptr,
                          * alignedQrySeqRC = nullptr;
-                    
-                    scoreCache.storeValue(0.,score_size-1);
-                    if (args.affine) {
-                        insertCache.storeValue(0.,score_size-1);
-                        deleteCache.storeValue(0.,score_size-1);
-                    }
                     
                     cawlign_fp rc_score = AlignStrings(
                                            refSequence.getString(),
@@ -490,9 +473,9 @@ int main (int argc, const char * argv[]) {
                                            codonScoring->s3x1.values(),
                                            args.local_option == local,
                                            args.out_format != refmap,
-                                           scoreCache.rvalues(),
-                                           insertCache.rvalues(),
-                                           deleteCache.rvalues(),
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
                                            codonScoring->resolutions.rvalues ()
                                            );
                     

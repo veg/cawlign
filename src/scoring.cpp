@@ -99,10 +99,20 @@ CawalignSimpleScores::CawalignSimpleScores (
     _init_alphabet ();
     // Cost matrix still comes from the scoring configuration, not the genetic-code file.
     vector<cawlign_fp> _scores = score_settings->aConfigVec<cawlign_fp>("MATRIX", "cost");
-    if (_scores.size() != (D+1) * (D+1)) {
-        ERROR_NO_USAGE ("The dimension of the cost matrix is incorrect");
+    if (_scores.size() == (D+1) * (D+1)) {
+        scoring_matrix.appendValues((cawlign_fp*)_scores.data(), (D+1)*(D+1));
+    } else if (_scores.size() == D * D) {
+        // Pad the matrix to (D+1) * (D+1)
+        vector<cawlign_fp> padded_scores((D+1)*(D+1), 0.0);
+        for (unsigned int i = 0; i < D; i++) {
+            for (unsigned int j = 0; j < D; j++) {
+                padded_scores[i * (D+1) + j] = _scores[i * D + j];
+            }
+        }
+        scoring_matrix.appendValues((cawlign_fp*)padded_scores.data(), (D+1)*(D+1));
+    } else {
+        ERROR_NO_USAGE ("The dimension of the cost matrix is incorrect (expected %d x %d or %d x %d)", D, D, D+1, D+1);
     }
-    scoring_matrix.appendValues((cawlign_fp*)_scores.data(), (D+1)*(D+1));
     open_gap_reference  = score_settings->aConfig<cawlign_fp>("PARAMETERS", "open_deletion");
     open_gap_query      = score_settings->aConfig<cawlign_fp>("PARAMETERS", "open_insertion");
     extend_gap_reference  = score_settings->aConfig<cawlign_fp>("PARAMETERS", "extend_deletion");
