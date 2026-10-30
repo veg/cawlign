@@ -1235,6 +1235,14 @@ cawlign_fp AlignStrings( char const * r_str
                         score_matrix[ i ] = cost;
                         insertion_matrix[ i ] = cost;
                         deletion_matrix[ i ] = cost;
+
+                        // the codon step only writes insertion_matrix for q >= 3, but q = 4, 5
+                        // read q = 1, 2 (curr - 3); partial-codon insertion states in column 0
+                        // are unreachable, so they must be -INFINITY rather than stale heap memory
+                        if ( do_codon ) {
+                            insertion_matrix[ i + 1 ] = -INFINITY;
+                            insertion_matrix[ i + 2 ] = -INFINITY;
+                        }
                     }
                 } else {
                     // no affine gaps
