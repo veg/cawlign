@@ -139,6 +139,7 @@ static bool BuildCorridor(
     const char* q_str, unsigned long q_len,
     unsigned long r_len, unsigned long score_rows,
     long W,
+    long max_width,
     const std::vector<RefKmerEntry>& ref_kmer_table,
     std::vector<long>& j_min,
     std::vector<long>& j_max
@@ -221,6 +222,31 @@ static bool BuildCorridor(
         }
     }
 
+    // Drop short anchor islands (runs separated from their neighbours by an unanchored gap). An optimal path
+    // can detour around a short island, e.g. a few k-mers surviving next to an inversion, so it must not pin
+    // the corridor. Dropping merges the surrounding gaps, which the checks below then judge as a whole.
+    const long kIslandGap = 60;
+    const long kMinIsland = 150;
+    for (bool dropped = true; dropped && anchors.size() > 1;) {
+        dropped = false;
+        std::vector<std::pair<long, long>> kept;
+        kept.reserve(anchors.size());
+        size_t run_start = 0;
+        for (size_t a = 1; a <= anchors.size(); ++a) {
+            bool run_end = (a == anchors.size()) ||
+                           std::max((anchors[a].first - anchors[a - 1].first) * 3, anchors[a].second - anchors[a - 1].second) > kIslandGap;
+            if (!run_end) continue;
+            long span = std::max((anchors[a - 1].first - anchors[run_start].first) * 3, anchors[a - 1].second - anchors[run_start].second);
+            if (span >= kMinIsland || (run_start == 0 && a == anchors.size())) {
+                kept.insert(kept.end(), anchors.begin() + run_start, anchors.begin() + a);
+            } else {
+                dropped = true;
+            }
+            run_start = a;
+        }
+        anchors.swap(kept);
+    }
+
     if (anchors.size() < 10) return false;
 
     const long r_span = (anchors.back().first - anchors.front().first) * 3;
@@ -247,30 +273,37 @@ static bool BuildCorridor(
         if (gap_diag > W || (gap_r > 300 && gap_q > 300)) return false;
     }
 
-    std::vector<long> j_star(score_rows);
-    long i0 = anchors[0].first;
-    long q0 = anchors[0].second;
-    for (long i = 0; i < i0; ++i) {
-        j_star[i] = std::max(0L, q0 - 3 * (i0 - i));
-    }
-    for (size_t a = 0; a + 1 < anchors.size(); ++a) {
-        long ia = anchors[a].first, qa = anchors[a].second;
-        long ib = anchors[a + 1].first, qb = anchors[a + 1].second;
-        for (long i = ia; i < ib; ++i) {
-            j_star[i] = qa + (i - ia) * (qb - qa) / (ib - ia);
+    // Corridor = union of boxes that any path through consecutive anchors must stay within, padded by W.
+    // The leading box reaches column 0 and the trailing box reaches q_len, because trim mode allows free
+    // starts on row 0 / column 0 and free ends on the last row / column; an optimal path may use these
+    // anywhere before the first (or after the last) anchor, far off the anchor diagonal.
+    j_min.assign(score_rows, (long)q_len);
+    j_max.assign(score_rows, 0L);
+    auto cover = [&](long i_lo, long i_hi, long lo, long hi) {
+        lo = std::max(0L, lo);
+        hi = std::min((long)q_len, hi);
+        for (long i = i_lo; i <= i_hi; ++i) {
+            j_min[i] = std::min(j_min[i], lo);
+            j_max[i] = std::max(j_max[i], hi);
         }
+    };
+    const long i0 = anchors.front().first;
+    const long q0 = anchors.front().second;
+    const long i_last = anchors.back().first;
+    const long q_last = anchors.back().second;
+    cover(0, i0, 0, q0 + W);
+    for (size_t a = 0; a + 1 < anchors.size(); ++a) {
+        cover(anchors[a].first, anchors[a + 1].first, anchors[a].second - W, anchors[a + 1].second + W);
     }
-    long i_last = anchors.back().first;
-    long q_last = anchors.back().second;
-    for (long i = i_last; i < (long)score_rows; ++i) {
-        j_star[i] = std::min((long)q_len, q_last + 3 * (i - i_last));
-    }
+    cover(i_last, (long)score_rows - 1, q_last - W, (long)q_len);
+    // Trim mode makes a leading query overhang nearly free on any row (and a trailing one cheap), so a path
+    // may start (end) with a long run of insertions on a row past the first (before the last) anchor.
+    // Reach column 0 (q_len) on every row near each end where the full span still fits the band stride.
+    for (long i = 0; i < (long)score_rows && j_max[i] + 1 <= max_width; ++i) j_min[i] = 0;
+    for (long i = (long)score_rows - 1; i >= 0 && (long)q_len - j_min[i] + 1 <= max_width; --i) j_max[i] = (long)q_len;
 
-    j_min.resize(score_rows);
-    j_max.resize(score_rows);
     for (long i = 0; i < (long)score_rows; ++i) {
-        j_min[i] = std::max(0L, j_star[i] - W);
-        j_max[i] = std::min((long)q_len, j_star[i] + W);
+        if (j_max[i] - j_min[i] + 1 > max_width) return false;
     }
 
     return true;
@@ -1585,7 +1618,7 @@ cawlign_fp AlignStrings( char const * r_str
                 auto ref_kmer_table_ptr = GetRefKmerTable(r_str, r_len);
 
                 constexpr long kBandWidth = 120;
-                constexpr int kBandShift = 8;
+                constexpr int kBandShift = 9;
                 constexpr long kBandStride = 1 << kBandShift;
                 static_assert(kBandStride >= 2 * kBandWidth + 1, "kBandStride must fit 2 * kBandWidth + 1");
 
@@ -1596,7 +1629,7 @@ cawlign_fp AlignStrings( char const * r_str
                 bool do_band = (do_local && !do_true_local && do_affine);
                 if (is_band_disabled()) do_band = false;
                 if (do_band) {
-                    do_band = BuildCorridor(q_str, q_len, r_len, score_rows, kBandWidth, *ref_kmer_table_ptr, j_min, j_max);
+                    do_band = BuildCorridor(q_str, q_len, r_len, score_rows, kBandWidth, kBandStride, *ref_kmer_table_ptr, j_min, j_max);
                 }
 
                 bool banded_done = false;
