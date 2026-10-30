@@ -139,6 +139,8 @@ add_test(NAME codon_default COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINE
 add_test(NAME codon_mtdna COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_mtdna.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/vertebrate-mtdna -r ${RES_DIR}/references/COXI-mouse -s ${RES_DIR}/scoring/BLOSUM62 -q ${CASES_DIR}/R_norvegicus_COXI.fa)
 
 add_test(NAME nuc_rc COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_rc.fa $<TARGET_FILE:cawlign> -R annotated -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-rc.fa)
+# Reverse complement of a query with IUPAC ambiguity codes (S/W map to themselves, K<->M, U->A); the baseline is the forward-strand alignment
+add_test(NAME nuc_rc_iupac COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_rc_iupac.fa $<TARGET_FILE:cawlign> -R annotated -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-rc-iupac.fa)
 
 add_test(NAME nuc_refalign COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_refalign.fa $<TARGET_FILE:cawlign> -f refalign -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
 add_test(NAME nuc_pairwise COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_pairwise.fa $<TARGET_FILE:cawlign> -f pairwise -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
