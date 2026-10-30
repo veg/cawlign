@@ -73,12 +73,9 @@ int main (int argc, const char * argv[]) {
     
     StringBuffer refName,
                  refSequence;
-
-    Vector       refNameLengths,
-                 refSeqLengths;
     
     long referenceSequenceLength = 0;
-    fasta_result = readFASTA (args.reference, automatonState, refName, refSequence, refNameLengths, refSeqLengths, referenceSequenceLength, true);
+    fasta_result = readFASTA (args.reference, automatonState, refName, refSequence, referenceSequenceLength);
     if (fasta_result == 1) {
         ERROR_NO_USAGE ("The FASTA reference sequence could not be parsed.");
     }
@@ -108,21 +105,18 @@ int main (int argc, const char * argv[]) {
     automatonState = 0;
     fasta_result   = 2;
     
-    #pragma omp parallel shared (automatonState, fasta_result, sequences_read, sequences_written, args, refName, refSequence, alignmentScoring) private (nameLengths, seqLengths, names, sequences)
+    #pragma omp parallel shared (automatonState, fasta_result, sequences_read, sequences_written, args, refName, refSequence, alignmentScoring)
     while (fasta_result == 2) {
         
         StringBuffer names,
                      sequences;
-
-        Vector       nameLengths,
-                     seqLengths;
             
         long           sequenceLength = 0;
         const   char * rc_seq_tag = empty_tag;
         
         #pragma omp critical
         {
-            fasta_result = readFASTA (args.input, automatonState, names, sequences, nameLengths, seqLengths, sequenceLength, true);
+            fasta_result = readFASTA (args.input, automatonState, names, sequences, sequenceLength);
             sequenceLength++;
             if (fasta_result == 1) {
                 ERROR_NO_USAGE ("Error reading the input FASTA file.");
