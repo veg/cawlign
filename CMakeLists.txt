@@ -3,10 +3,13 @@ cmake_minimum_required(VERSION 3.10)
 project(cawlign)
 
 #-------------------------------------------------------------------------------
-# default installation prefix
+# installation prefix: use the standard CMAKE_INSTALL_PREFIX (default /usr/local);
+# -DINSTALL_PREFIX=... is still accepted as an alias for backward compatibility
 #-------------------------------------------------------------------------------
-set(INSTALL_PREFIX /usr/local CACHE PATH "Installation prefix")
-set(CMAKE_INSTALL_PREFIX ${INSTALL_PREFIX} CACHE INTERNAL "Installation prefix" FORCE)
+if(DEFINED INSTALL_PREFIX)
+    set(CMAKE_INSTALL_PREFIX ${INSTALL_PREFIX} CACHE PATH "Installation prefix" FORCE)
+    unset(INSTALL_PREFIX CACHE)
+endif()
 
 set(CMAKE_CONFIGURATION_TYPES Release)
 
@@ -73,7 +76,7 @@ target_link_options (cawlign_prof PRIVATE -g -O3 -march=native -std=c++14 -funro
 
 set_property(
     TARGET cawlign
-    APPEND PROPERTY COMPILE_DEFINITIONS LIBRARY_PATH="${INSTALL_PREFIX}/share/cawlign"
+    APPEND PROPERTY COMPILE_DEFINITIONS LIBRARY_PATH="${CMAKE_INSTALL_PREFIX}/share/cawlign"
 )
 
 
@@ -151,6 +154,10 @@ add_test(NAME negative_invalid_datatype COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER
 # Invalid Genetic Code
 add_test(NAME negative_invalid_genetic_code COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "unknown NCBI genetic code number 999" dummy.fa $<TARGET_FILE:cawlign> -t codon -c 999 -q ${CASES_DIR}/OQ948666-pr.fa)
 set_tests_properties(negative_invalid_genetic_code PROPERTIES ENVIRONMENT "CAWLIGN_LIBRARY_PATH=${RES_DIR}")
+
+# Library lookup by name: reference, scoring and genetic code resolved via CAWLIGN_LIBRARY_PATH
+add_test(NAME codon_library_path COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_default.fa $<TARGET_FILE:cawlign> -t codon -c universal -r HXB2_pr -s BLOSUM62 -q ${CASES_DIR}/OQ948666-pr.fa)
+set_tests_properties(codon_library_path PROPERTIES ENVIRONMENT "CAWLIGN_LIBRARY_PATH=${RES_DIR}")
 
 # Incompatible Options (Protein + RC)
 add_test(NAME negative_protein_rc COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "Reverse complement options other than 'none' are not compatible with the protein data type" dummy.fa $<TARGET_FILE:cawlign> -t protein -R annotated -q ${CASES_DIR}/OQ948666-pr.fa)
