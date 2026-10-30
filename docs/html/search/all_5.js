@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['nucleotide_5fdiff_0',['nucleotide_diff',['../classCawalignCodonScores.html#ac093469e740931bbe56ddd28ba643c63',1,'CawalignCodonScores']]]
+  ['flip_0',['flip',['../classStringBuffer.html#a98b19ce50548d573f45cf7793280865e',1,'StringBuffer']]]
 ];

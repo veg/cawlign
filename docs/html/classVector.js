@@ -5,6 +5,7 @@ var classVector =
     [ "appendValue", "classVector.html#a662935cdd39a5b35fec368eca8663a79", null ],
     [ "appendVector", "classVector.html#a06a0264333af5e6abfa6af7f9cbea375", null ],
     [ "extractMin", "classVector.html#a491d489e873b65ee3e3364d18970cbe3", null ],
+    [ "length", "classVector.html#acf1f4377e963a33747f1a4947ef8e66e", null ],
     [ "remove", "classVector.html#aed3a095e8c8c941edd4172ed2bf04e19", null ],
     [ "resetVector", "classVector.html#ac4a4028aabebb045816a4d770005cb35", null ],
     [ "sort", "classVector.html#af35e4ca3ebf4fdb499c7c52c7bb209a5", null ],

@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['value_0',['value',['../classVector.html#aea6ce00df1f8cac7911fb28b2be30f95',1,'Vector']]],
-  ['vector_1',['vector',['../classVector.html',1,'Vector'],['../classVector.html#adc7052514a833f0fbb5ee306a5550ea0',1,'Vector::Vector()']]],
-  ['vectorfp_2',['vectorfp',['../classVectorFP.html',1,'VectorFP'],['../classVectorFP.html#abb3e79a0fb71d526293db5dabc30ae41',1,'VectorFP::VectorFP()']]]
+  ['length_0',['length',['../classStringBuffer.html#ada0939b21663e9e9a824a519813b36ef',1,'StringBuffer::length()'],['../classVectorFP.html#a3d85892864d9a2b22b7acaedabf9b128',1,'VectorFP::length()'],['../classVector.html#acf1f4377e963a33747f1a4947ef8e66e',1,'Vector::length()']]]
 ];

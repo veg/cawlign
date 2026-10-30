@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['flip_0',['flip',['../classStringBuffer.html#a98b19ce50548d573f45cf7793280865e',1,'StringBuffer']]]
+  ['extractmin_0',['extractMin',['../classVector.html#a491d489e873b65ee3e3364d18970cbe3',1,'Vector']]]
 ];

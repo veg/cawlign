@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['_7eargs_5ft_0',['~args_t',['../classargparse_1_1args__t.html#a0ecca5c14407c2abb97a669b4382865a',1,'argparse::args_t']]],
-  ['_7estringbuffer_1',['~StringBuffer',['../classStringBuffer.html#ae46cbedbdf27a325aaa57fb95fac276b',1,'StringBuffer']]],
-  ['_7evector_2',['~Vector',['../classVector.html#ae8533ae4f11176cc2f19dc529f34efff',1,'Vector']]],
-  ['_7evectorfp_3',['~VectorFP',['../classVectorFP.html#a7a449431c2aab34bc95730211539587a',1,'VectorFP']]]
+  ['remove_0',['remove',['../classVector.html#aed3a095e8c8c941edd4172ed2bf04e19',1,'Vector']]],
+  ['reset_5flength_1',['reset_length',['../classStringBuffer.html#a4bc13c2dfaa92563fd9cb7018cdef7da',1,'StringBuffer']]],
+  ['resetstring_2',['resetString',['../classStringBuffer.html#a76c51f3adc60471f4e8cb2c72b2daf9b',1,'StringBuffer']]],
+  ['resetvector_3',['resetVector',['../classVector.html#ac4a4028aabebb045816a4d770005cb35',1,'Vector']]],
+  ['rvalues_4',['rvalues',['../classVectorFP.html#ac4966e49478add4046cc1fc3ccf151b4',1,'VectorFP']]]
 ];

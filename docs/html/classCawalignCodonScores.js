@@ -1,4 +1,4 @@
 var classCawalignCodonScores =
 [
-    [ "CawalignCodonScores", "classCawalignCodonScores.html#a358ac64056d52152adee094f670303ab", null ]
+    [ "CawalignCodonScores", "classCawalignCodonScores.html#aaa21c938df577e2bcbc82e45c7789811", null ]
 ];
