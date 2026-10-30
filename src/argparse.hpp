@@ -20,7 +20,7 @@
 #include "stringBuffer.h"
 
 #ifndef VERSION_NUMBER
-    #define VERSION_NUMBER            "0.0.1"
+    #define VERSION_NUMBER            "0.2.0"
 #endif
 
 #ifndef LIBRARY_PATH
