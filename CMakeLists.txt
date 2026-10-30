@@ -94,3 +94,10 @@ install(
 
 install(DIRECTORY res/ DESTINATION share/cawlign)
 
+
+enable_testing()
+add_test(
+    NAME codon_affine_determinism
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/codon_affine_determinism.sh
+            $<TARGET_FILE:cawlign> ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/test-tmp
+)
