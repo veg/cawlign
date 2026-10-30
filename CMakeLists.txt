@@ -206,6 +206,10 @@ add_test(NAME codon_kf576595_rt COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASE
 add_test(NAME codon_ins123_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_ins123_pol.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_pol ${CASES_DIR}/ins123_pol.fa)
 add_test(NAME codon_margin400_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_margin400_pol.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_pol ${CASES_DIR}/margin400_pol.fa)
 
+# Regression tests for codon global/local affine col-0 insertion init (baselines from main)
+add_test(NAME codon_global_affine COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_global_affine.fa $<TARGET_FILE:cawlign> -t codon -l global -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/lanl-pol-10.fa)
+add_test(NAME codon_local_affine COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_local_affine.fa $<TARGET_FILE:cawlign> -t codon -l local -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/lanl-pol-10.fa)
+
 
 #-------------------------------------------------------------------------------
 # Installation

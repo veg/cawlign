@@ -2135,6 +2135,8 @@ cawlign_fp AlignStrings( char const * r_str
                             sc_c[0] = cost;
                             del_c[0] = cost;
                             ins_c[0] = cost;
+                            ins_c[1] = -INFINITY;
+                            ins_c[2] = -INFINITY;
                         } else {
                             sc_c[0] = 0.0f;
                             del_c[0] = 0.0f;
