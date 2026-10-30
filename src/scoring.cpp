@@ -90,6 +90,9 @@ CawalignSimpleScores::CawalignSimpleScores (
             scoring_matrix(),
             gap_char ('-')
 {
+    if (!score_settings->hasConfig("ALPHABET", "alphabet")) {
+        ERROR_NO_USAGE ("This scoring file has no [ALPHABET] section; protein and nucleotide modes require one (the shipped BLOSUM62 is a codon scoring file, use it with -t codon)");
+    }
     string _alph = score_settings->aConfig<string>("ALPHABET", "alphabet");
     alphabet.appendBuffer(_alph.c_str());
     D = (unsigned int)alphabet.length();
