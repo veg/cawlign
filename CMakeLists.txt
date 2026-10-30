@@ -158,6 +158,9 @@ add_test(NAME negative_protein_rc COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --ex
 # Codon Mode - Reference length not divisible by 3
 add_test(NAME negative_codon_div3 COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "The reference sequence must have length divisible by 3" dummy.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/div3_fail.fa -q ${CASES_DIR}/OQ948666-pr.fa)
 
+# Protein Mode - codon scoring file (no [ALPHABET] section)
+add_test(NAME negative_protein_codon_scoring COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "This scoring file has no [ALPHABET] section" dummy.fa $<TARGET_FILE:cawlign> -t protein -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pr -q ${CASES_DIR}/OQ948666-pr.fa)
+
 # Codon Mode - Stop codon in reference
 add_test(NAME negative_codon_stop_ref COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} --expect-fail --expect-error "The reference sequence must not have stop codons in it" dummy.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${CMAKE_SOURCE_DIR}/test/edge_cases/stop_ref.fa -q ${CASES_DIR}/OQ948666-pr.fa)
 
@@ -209,6 +212,9 @@ add_test(NAME codon_margin400_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BA
 # Regression tests for corridor soundness: unanchored leading segments and internal inversions (baselines from main)
 add_test(NAME codon_band_lead_inv_pol COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_band_lead_inv_pol.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_pol ${CASES_DIR}/band_lead_inv_pol.fa)
 add_test(NAME codon_band_lead_inv_gag COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_band_lead_inv_gag.fa $<TARGET_FILE:cawlign> -q -t codon -s ${RES_DIR}/scoring/BLOSUM62 -c ${RES_DIR}/genetic_codes/universal -r ${RES_DIR}/references/HXB2_gag ${CASES_DIR}/band_lead_inv_gag.fa)
+
+# Codon global/local output must not depend on thread count, record order, or malloc fill pattern
+add_test(NAME codon_affine_determinism COMMAND ${CMAKE_SOURCE_DIR}/test/codon_affine_determinism.sh $<TARGET_FILE:cawlign> ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/test-tmp)
 
 # Regression tests for codon global/local affine col-0 insertion init (baselines from main)
 add_test(NAME codon_global_affine COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_global_affine.fa $<TARGET_FILE:cawlign> -t codon -l global -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/BLOSUM62 -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/lanl-pol-10.fa)

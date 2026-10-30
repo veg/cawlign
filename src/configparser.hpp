@@ -34,6 +34,9 @@ class ConfigParser {
   public:
   ConfigParser(std::ifstream& configFile);
 
+    bool hasConfig(std::string section, std::string name) const {
+        return mConfigurations.find(section + " - " + name) != mConfigurations.end();
+    }
     template<typename T>
     T aConfig(std::string section, std::string name, size_t pos = 0);
     template<typename T>
