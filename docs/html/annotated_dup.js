@@ -8,7 +8,6 @@ var annotated_dup =
     [ "ConfigParser", "classConfigParser.html", "classConfigParser" ],
     [ "KmerHit", "structKmerHit.html", null ],
     [ "RefKmerEntry", "structRefKmerEntry.html", null ],
-    [ "sequence_gap_structure", "structsequence__gap__structure.html", "structsequence__gap__structure" ],
     [ "StringBuffer", "classStringBuffer.html", "classStringBuffer" ],
     [ "Vector", "classVector.html", "classVector" ],
     [ "VectorFP", "classVectorFP.html", "classVectorFP" ]

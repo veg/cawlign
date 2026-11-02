@@ -7,7 +7,6 @@ var hierarchy =
     [ "ConfigParser", "classConfigParser.html", null ],
     [ "KmerHit", "structKmerHit.html", null ],
     [ "RefKmerEntry", "structRefKmerEntry.html", null ],
-    [ "sequence_gap_structure", "structsequence__gap__structure.html", null ],
     [ "StringBuffer", "classStringBuffer.html", null ],
     [ "Vector", "classVector.html", null ],
     [ "VectorFP", "classVectorFP.html", null ]
