@@ -142,6 +142,13 @@ add_test(NAME nuc_rc COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/
 # Reverse complement of a query with IUPAC ambiguity codes (S/W map to themselves, K<->M, U->A); the baseline is the forward-strand alignment
 add_test(NAME nuc_rc_iupac COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_rc_iupac.fa $<TARGET_FILE:cawlign> -R annotated -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-rc-iupac.fa)
 
+# Every IUPAC code readFASTA accepts (R Y S W K M B D H V N ?, plus U->A) in one RC query; baselines are the forward-strand alignments (name gets the |RC suffix)
+add_test(NAME nuc_rc_iupac_all COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_rc_iupac_all.fa $<TARGET_FILE:cawlign> -R annotated -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-rc-iupac-all.fa)
+add_test(NAME codon_rc_iupac_all COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_rc_iupac_all.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/HIV_BETWEEN_F -R annotated -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-rc-iupac-all.fa)
+# A forward-winning query containing U must keep U in the output with -R annotated (baseline is the run without -R)
+add_test(NAME nuc_rc_iupac_u_keep COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_iupac_u_keep.fa $<TARGET_FILE:cawlign> -R annotated -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-iupac-u.fa)
+add_test(NAME nuc_iupac_u_keep_noR COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_iupac_u_keep.fa $<TARGET_FILE:cawlign> -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-iupac-u.fa)
+add_test(NAME codon_rc_iupac_u_keep COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/codon_iupac_u_keep.fa $<TARGET_FILE:cawlign> -t codon -c ${RES_DIR}/genetic_codes/universal -s ${RES_DIR}/scoring/HIV_BETWEEN_F -R annotated -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404-iupac-u.fa)
 add_test(NAME nuc_refalign COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_refalign.fa $<TARGET_FILE:cawlign> -f refalign -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
 add_test(NAME nuc_pairwise COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_pairwise.fa $<TARGET_FILE:cawlign> -f pairwise -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
 add_test(NAME nuc_refmap_with_ref COMMAND ${TEST_PYTHON_EXE} ${TEST_RUNNER} ${BASELINES_DIR}/nuc_refmap_with_ref.fa $<TARGET_FILE:cawlign> -I -f refmap -r ${RES_DIR}/references/HXB2_pol -q ${CASES_DIR}/KX988404.fa)
