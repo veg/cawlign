@@ -33,7 +33,7 @@ void initAlphabets (bool doAminoAcid) {
     
   for (int i = 0; i < 256; i++) {
     validFlags [i] = -1;
-    reverseComplementCharacters [i] = -1;
+    reverseComplementCharacters [i] = 0; // 0 = no complement
   }
   
   if (doAminoAcid) {
@@ -45,12 +45,15 @@ void initAlphabets (bool doAminoAcid) {
      reverseComplementCharacters['C'] = 'G';
      reverseComplementCharacters['G'] = 'C';
      reverseComplementCharacters['T'] = 'A';
+     reverseComplementCharacters['U'] = 'A';
      reverseComplementCharacters['N'] = 'N';
      reverseComplementCharacters['?'] = '?';
      reverseComplementCharacters['R'] = 'Y';
      reverseComplementCharacters['Y'] = 'R';
-     reverseComplementCharacters['S'] = 'W';
-     reverseComplementCharacters['W'] = 'S';
+     reverseComplementCharacters['S'] = 'S';
+     reverseComplementCharacters['W'] = 'W';
+     reverseComplementCharacters['K'] = 'M';
+     reverseComplementCharacters['M'] = 'K';
      reverseComplementCharacters['B'] = 'V';
      reverseComplementCharacters['V'] = 'B';
      reverseComplementCharacters['D'] = 'H';
